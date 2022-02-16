@@ -81,3 +81,56 @@ st_write(pres.fnetSF, dsn = ".", layer = "pied_fnetSF", driver = "ESRI Shapefile
 # save objects
 setwd(path.ex) # output path
 save("pres.fnetSF", "pres.fnetDF", file = "pres.fnet.RData")
+
+#-----------Question 3------------#
+pres.xy <- pres[c("wgs_xF", "wgs_yF")]  # get x,y of species presences
+p1 <- sp::coordinates(pres.xy) # set spatial coords from pied.bufptR
+
+# extract FNETID of presence from  modelling frame
+pres.fnetid <- cellFromXY(pres.bufR, p1)
+head(pres.fnetid)
+
+#checks
+length(pres.fnetid) # should match number of presences ??
+length(pres$PERS106) # it does ... life is good !!
+
+# create species dataframe with FNETIDs
+tru.presFNET <- cbind(pres.fnetid, pres) # add fishnet ID to tru.pres
+names(tru.presFNET)[1] <- "FNETID" # name change 
+head(tru.presFNET, 2) # examine
+
+# giggle plots
+plot(pres.bufR, col = "gray70", legend = F, main = "Points in modelling frame")  # main plot
+points(pres$wgs_xF, pres$wgs_yF, pch = 20, col = "darkgreen") # add spp locations
+
+#extract fnetid
+buf.fnetid <- extract(pres.bufR, pres.fnetDF[c("cell.wgs_x", "cell.wgs_y")])
+
+# create modelling dataframe with FNETIDs
+tru.bufFNET <- cbind(pres.fnetDF, buf.fnetid) # bind modelling frame w/FISHNET
+head(tru.bufFNET, 2) # examine
+
+# some internal checking
+length(tru.bufFNET$buf.fnetid) # number FNETIDs in tru.bufptFNET
+ncell(pres.bufR) # should equal above
+table(tru.bufFNET$buf.fnetid)[[1]] # number of FNETIDs in pied.bufptR
+length(which(is.na(tru.bufFNET$bufpt.fnetid))) # No. NAs
+
+# giggle plots: modelling frames nested in fishnet
+plot(pres.bufSP, col = "gray90", legend = F, main = "Modelling frame on FISHNET")  # main plot
+plot(pres.bufR, col = "gray50", legend = F, add = T)  # main plot
+
+# giggle plots: spp location nested in modelling frames nested in fishnet
+plot(pres.bufSP, col = "gray90",
+     main = "SP locations nested in modelling frame in FISHNET")  # main plot
+points(pres$wgs_xF, pres$wgs_yF, pch = 20, col = "darkgreen") # spp locations if desired
+plot(pres.bufR, col = "gray50", legend = F, add = T)  # main plot
+
+######## START MERGE SPP LOCATION, MODELLING FRAME, ALL BY FISHNET ID'S 
+# examine dataframes
+head(pres.fnetDF, 2) # fishnet dataframe
+dim(pres.fnetDF)[1] # size of fishnet dataframe
+head(tru.bufFNET, 2) # modelling dataframe
+table(tru.bufFNET$bufpt.fnetid)[[1]] # number of FNETIDs in pied.bufptR
+head(presFNET, 2) # spp locations dataframe
+dim(presFNET)[1] # number spp locations
