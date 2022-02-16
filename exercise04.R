@@ -52,3 +52,32 @@ f3 <- as.data.frame(cbind(f1, f2)) # build datframe of x,y & cell number
 head(f3, 2) # examine
 tail(f3, 1) # f2 value should = ncell in pres.bufR; below
 ncell(pres.bufR) # should = f2 value above
+
+names(f3)[1:3] <- c("cell.wgs_x", "cell.wgs_y", "FNETID") # assign names
+f3 <- f3[c("FNETID", "cell.wgs_x", "cell.wgs_y")] # reorder
+
+#Examine
+dim(f3) # dimension; rows is maximum number of cells in fishnet 
+names(f3) # names in fishnet
+head(f3) #examine
+tail(f3)
+
+#convert to spatial object
+pres.fnetSF <- st_as_sf(f3, coords = c("cell.wgs_x", "cell.wgs_y"), 
+                        crs = prj.wgs84, remove = F) # remove=F retains input x,y)
+head(pres.fnetSF, 2) # examine
+
+# build stand-alone dataframe
+class(pres.fnetSF) # note dataframe class; will extract data.frame
+pres.fnetDF <- st_drop_geometry(pres.fnetSF) # build dataframe
+head(pres.fnetDF, 2) # examine
+class(pres.fnetDF) # check if class=data.frame
+
+# export as esri shapefile & dataframe
+setwd(path.ex) # output path
+st_write(pres.fnetSF, dsn = ".", layer = "pied_fnetSF", driver = "ESRI Shapefile",
+         delete_layer = T, delete_dsn = T) # output shapefile
+
+# save objects
+setwd(path.ex) # output path
+save("pres.fnetSF", "pres.fnetDF", file = "pres.fnet.RData")
