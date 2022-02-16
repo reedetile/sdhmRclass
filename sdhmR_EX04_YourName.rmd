@@ -1,0 +1,141 @@
+---
+title: "Exercise Title Goes Here"
+author: "Your Name Goes Here"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
+
+<!-- These are global options  
+       set root directory here 
+       NOTE mine is active; yours is commented out
+       change the path to reflect your CPU,
+       then comment out or delete mine
+--> 
+```{r global_options, include=FALSE}
+knitr::opts_knit$set(root.dir = "~/words/classes/sdmR_ALLversions/sdhmR-V2022.1")
+#knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
+knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
+```
+
+---
+
+## This exercise links to Module 2.4
+
+Submit the completed exercise to us at:
+
+* t.edwards@usu.edu 
+* eric_tsakiris@fws.gov  
+
+---
+
+## Context
+
+The data are of the *Pinus edulis* Common piñon, the species you dealt with in Exercise #3.  In this exercise we assume the acquisition of species location data reveals that data are presence-only (measured 1's only; no 0=absence)
+
+The goal is to build a dataframe consisting of pseudo--absences selected from *edulis*' geographic and environmental background.
+
+### The Twist to this Exercise
+
+There's a twist to what you will do in exercises starting now, with all subsequent exercises being group--based.  You can self--organize into groups, or I can assign you to a group.  Groups are on the order of 2--4 individuals. 
+
+* **IMPORTANT**: If you wish to self--organize do that quickly and let Eric and I know ASAP.  You will need to provide the name and email address of those in your group.  Pick a leader to act as the principal POC.
+
+Each group will be assigned one type of data, as descried below.  Once assigned a type of data, you will use those data for the rest of the class.
+
+The data for *edulis*  have four discrete labels:
+
+* **Seedlings**:  these data indicate spatial locations where seedlings of the tree have been found
+* **Mortality**: these data indicate spatial locations where mortality has been observed
+* **Persistence**: these data have no observed mortality or seedling at given spatial locations
+* **Range**: the total dataset, including all spatial locations of seedlings, mortality, and persistence
+
+---
+
+## The Data
+
+* Common piñon *Pinus edulis* sppcode=106
+* Data for each group in:
+  * **`~\sdhmR-V2022.1\data\exercise\traindat`** 
+* Data files:
+  * **`spp106pr_MORT.csv`**, **`spp106pr_PERS.csv`**, **`spp106pr_RANG.csv`**, **`spp106pr_SEED.csv`**
+
+**Global options and loading data**
+
+```{r}
+#Setting Paths
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1"
+path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
+path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
+path.gis <- paste(path.root, "/data/gis_layers", sep = "") #path to gis files
+
+# some libraries
+library(raster)	# FXNS: extent, raster, res, rasterize, values, writeRaster, 
+#       cellFromXY, extract
+library(sf)    	# FXNS: st_as_sf, st_as_sfc, st_bbox, st_convex_hull, st_union
+#       st_buffer, st_read, st_write, st_intersection, st_geometry,
+#       st_drop_geometry, st_coordinates, st_sf
+library(terra)	# FXNS: as.data.frame, rast, vect
+library(sp)
+
+# source course CRSs
+setwd(path.root)
+source("r_code/prjs4_sdhmR.r") # source course CRSs
+ls(pattern = "prj.") # should be 5 prj.* objects
+```
+---
+
+## Question #1
+
+* Import the data type you have been assigned to work with
+* Build a buffered-presence points bounding box
+  * Buffer each point by ~50km 
+  * **CAUTION**:  make sure the pluses and minuses when buffering are in the correct direction given north, south, east, and west !! (Serious screw-ups happen here …)
+* Ensure you assign correct CRS, values, and resolution to bounding box
+
+```{r}
+setwd(path.ex)
+pres <- read.csv('spp106pr_PERS.csv')
+pres
+presSF <- st_as_sf(pres, coords = c('wgs_xF', 'wgs_yF'), crs = prj.wgs84)
+plot(presSF['PERS106'], col = "darkgreen", pch = 20, axes = T)
+
+#Build a buffered presence bbox
+extb <- extent(min(pres$wgs_xF) - 0.5, max(pres$wgs_xF) + 0.5, 
+               min(pres$wgs_yF) - 0.5, max(pres$wgs_yF) + 0.5)
+# create .5 decideg buffered poly
+pres.bufSF <- st_as_sfc(st_bbox(extb, crs = prj.wgs84))
+pres.bufSF # examine
+plot(st_geometry(pres.bufSF), axes = T) # NOT RUN
+plot(presSF['PERS106'], col = "darkgreen", pch = 20, axes = T, add = T)
+```
+
+---
+
+## Question #2
+
+* Build a fishnet for the bounding box
+
+---
+
+## Question #3
+
+* Use the fishnet to create a pseudo--absence data frame of [X,Y]’s
+* For simplicity’s sake, set $n$ for pseudo--absence at twice (2$\times$) the number of presences in your respective RANG, PERS, MORT, and SEED data set
+* Bind these data to the presence dataframe you imported in Question #1
+
+---
+
+## Question #4
+
+* Save your data as R objects, including both the true presence and pseudo-absences:
+  * Dataframe;
+  * Point shapefile with geometry in R
+  * Export as a point shapefile in ESRI format
+* Save these R objects in a **`.RData`** file
+* Save the bounding box as a raster--based **`.img`** file
+
+---
+
+## The End
+
+---
