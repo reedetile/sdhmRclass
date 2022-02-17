@@ -111,7 +111,7 @@ tru.bufFNET <- cbind(pres.fnetDF, buf.fnetid) # bind modelling frame w/FISHNET
 head(tru.bufFNET, 2) # examine
 
 # some internal checking
-length(tru.bufFNET$buf.fnetid) # number FNETIDs in tru.bufptFNET
+length(tru.bufFNET$buf.fnetid) # number FNETIDs in tru.bufFNET
 ncell(pres.bufR) # should equal above
 table(tru.bufFNET$buf.fnetid)[[1]] # number of FNETIDs in pied.bufptR
 length(which(is.na(tru.bufFNET$bufpt.fnetid))) # No. NAs
@@ -131,6 +131,27 @@ plot(pres.bufR, col = "gray50", legend = F, add = T)  # main plot
 head(pres.fnetDF, 2) # fishnet dataframe
 dim(pres.fnetDF)[1] # size of fishnet dataframe
 head(tru.bufFNET, 2) # modelling dataframe
-table(tru.bufFNET$bufpt.fnetid)[[1]] # number of FNETIDs in pied.bufptR
-head(presFNET, 2) # spp locations dataframe
-dim(presFNET)[1] # number spp locations
+table(tru.bufFNET$buf.fnetid)[[1]] # number of FNETIDs in pied.bufptR
+head(tru.bufFNET, 2) # spp locations dataframe
+dim(tru.bufFNET)[1] # number spp locations
+
+# begin merge: NOTE merge by=c("sort vars") & all.y=T options
+m1 <- merge(pres.fnetDF, tru.bufFNET, by = c("FNETID", "cell.wgs_x", "cell.wgs_y"), all.y = T)
+head(m1, 2) # examine: FNETID no longer ranked but not to worry ...
+pres.indexFNET <- merge(m1, tru.presFNET, by = c("FNETID"), all = T) # final merge:assign DF name
+head(pres.indexFNET, 2) # final merge: FNETID now ranked
+names(pres.indexFNET)[4] <- "in.modFR" # change some names
+names(pres.indexFNET) # examine names
+
+# internal checking
+length(pres.indexFNET$FNETID) # does it match w/above ?? yes !
+table(pres.indexFNET$in.modFR)[[1]] # does it match w/above ?? yes !
+table(pres.indexFNET$PERS106)[[1]] # does it match w/above ?? yes !
+names(pres.indexFNET) # names make sense ?? yes !
+
+# outfile final fnet index dataframe
+setwd(path.mod2)
+save(pres.indexFNET, file = "pres.indexFNET.RData")
+
+# examine the fishnet
+head(pres.indexFNET)
