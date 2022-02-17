@@ -155,3 +155,67 @@ save(pres.indexFNET, file = "pres.indexFNET.RData")
 
 # examine the fishnet
 head(pres.indexFNET)
+
+##################################################3
+#Extracting pseduo absence
+# create conditional vectors: FNETIDs by spp locations & in modelling frame
+p2.spp <- subset(pres.indexFNET$FNETID, pres.indexFNET$PERS106 == 1) # FNETIDs of spp locations
+p2.modFR <- subset(pres.indexFNET$FNETID, pres.indexFNET$in.modFR == 1) # FNETIDs in modelling frame
+length(p2.spp) # should equal N of spp locations
+length(p2.modFR) # should equal N modelling frame
+
+# drop presence cell FNETIDs; remaining are possible psuedo-abs cell FNETIDs
+p3 <- pres.indexFNET[!pres.indexFNET$FNETID %in% p2.spp, ] # background from fishnet
+p4 <- pres.indexFNET[!pres.indexFNET$FNETID %in% p2.spp & pres.indexFNET$FNETID %in% p2.modFR, ] # background from modelling frame
+pers.bufpt <- p4 # new name to dataframe: this dataframe used from now on
+
+# internal checking
+length(pres.indexFNET$FNETID) # N of FISHNET
+dim(p3)[1] # N of FISHNET - N spp locations
+table(pres.indexFNET$PERS106)[[1]] # N spp locations
+dim(p3)[1] + table(pres.indexFNET$PERS106)[[1]] # should equal N of FISHNET
+length(p2.modFR) # N of modelling frame
+dim(p4)[1] # N modelling frame - N spp locations
+dim(p4)[1] + table(pres.indexFNET$PERS106)[[1]] # should equal N modelling frame
+
+# start the draws; multiple options shown below
+#   NOTE: set seed if desire repeatability of srs
+set.seed(1234) # set seed to ensure repeatability: make sure you remember what it is !!
+pers.srs1 <- pers.bufpt[sample(1:nrow(pers.bufpt), 
+                               table(pres.indexFNET$PERS106)[[1]], replace = F), ]
+pers.srs1$PERS106 <- 0 # assign 0 to pers.abs
+pers.srs1$in.modFR <- 1 # assign 1 to in.modFR
+dim(pers.srs1) # dim[1] should equal N spp locations, dim[2] the No. variables
+head(pers.srs1, 2) # examine
+
+# start the draws; multiple options shown below
+#   N=2*No. pres
+set.seed(1234) # set seed to ensure repeatability
+pers.srs2 <- pers.bufpt[sample(1:nrow(pers.bufpt), 2 * table(pres.indexFNET$PERS106)[[1]], replace = F), ]
+pers.srs2$PERS106 <- 0  # assign 0 to PERS.abs
+pers.srs2$in.modFR <- 1  # assign 1 to in.modFR
+
+
+######## START MERGE PSEUDO-ABS WITH TRUE PRESENCE DATAFRAME  
+# merge with true presences for predictor extraction
+head(tru.presFNET, 2)
+head(pers.srs1, 2) # examine; both MUST have FNETID
+pers.PPsA <- merge(tru.presFNET, pers.srs1, by = c("FNETID", "PERS106", "wgs_xF", "wgs_yF"), 
+                   all = T) # merge
+pers.PPsA$in.modFR <- NULL # drop in.modFR index no longer needed
+dim(pers.PPsA) # examine
+head(pers.PPsA, 2) # dim => No. pres + No. pers.abs
+
+# create common x,y from tru pres and pseudo-abs x,y's
+pers.PPsA[352:355, ] # note diff [X,Y] coords for pres=0 & =1
+
+# create new vars wgs_x & wgs_y; used later in raster stack extraction
+pers.PPsA$tr.wgs_x <- ifelse(pers.PPsA$PERS106 == 0, pers.PPsA$cell.wgs_x, pers.PPsA$wgs_xF)
+pers.PPsA$tr.wgs_y <- ifelse(pers.PPsA$PERS106 == 0, pers.PPsA$cell.wgs_y, pers.PPsA$wgs_yF) 
+pers.PPsA[352:355, ] # examine a subset
+
+# resulting data frame is model training data set; outfile if desired
+setwd(path.ex)
+write.csv(pers.PPsA, file = "pers_PPsA.csv", row.names = F) # save .csv
+save(pers.PPsA, file = "pers.PPsA.RData") # save .RData
+
