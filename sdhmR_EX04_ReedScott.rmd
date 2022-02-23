@@ -1,8 +1,71 @@
-#sdhmR assignment 4
-#Feb 18 2022
-#RCS
+---
+title: "EX04"
+author: "Reed Scott & Lindsey Pekurny"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
 
-#----------Global options---------#
+<!-- These are global options  
+       set root directory here 
+       NOTE mine is active; yours is commented out
+       change the path to reflect your CPU,
+       then comment out or delete mine
+--> 
+
+```{r global_options, include = FALSE}
+knitr::opts_knit$set(root.dir = "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1/")
+#knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
+knitr::opts_chunk$set(warning=FALSE,
+                      error=TRUE,
+                      message=FALSE)
+```
+
+
+---
+
+## This exercise links to Module 2.4
+
+Submit the completed exercise to us at:
+
+* t.edwards@usu.edu 
+* eric_tsakiris@fws.gov  
+
+---
+
+## Context
+
+The data are of the *Pinus edulis* Common piñon, the species you dealt with in Exercise #3.  In this exercise we assume the acquisition of species location data reveals that data are presence-only (measured 1's only; no 0=absence)
+
+The goal is to build a dataframe consisting of pseudo--absences selected from *edulis*' geographic and environmental background.
+
+### The Twist to this Exercise
+
+There's a twist to what you will do in exercises starting now, with all subsequent exercises being group--based.  You can self--organize into groups, or I can assign you to a group.  Groups are on the order of 2--4 individuals. 
+
+* **IMPORTANT**: If you wish to self--organize do that quickly and let Eric and I know ASAP.  You will need to provide the name and email address of those in your group.  Pick a leader to act as the principal POC.
+
+Each group will be assigned one type of data, as descried below.  Once assigned a type of data, you will use those data for the rest of the class.
+
+The data for *edulis*  have four discrete labels:
+
+* **Seedlings**:  these data indicate spatial locations where seedlings of the tree have been found
+* **Mortality**: these data indicate spatial locations where mortality has been observed
+* **Persistence**: these data have no observed mortality or seedling at given spatial locations
+* **Range**: the total dataset, including all spatial locations of seedlings, mortality, and persistence
+
+---
+
+## The Data
+
+* Common piñon *Pinus edulis* sppcode=106
+* Data for each group in:
+  * **`~\sdhmR-V2022.1\data\exercise\traindat`** 
+* Data files:
+  * **`spp106pr_MORT.csv`**, **`spp106pr_PERS.csv`**, **`spp106pr_RANG.csv`**, **`spp106pr_SEED.csv`**
+
+**Global options and loading data**
+
+```{r}
 #Setting Paths
 path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1"
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
@@ -22,11 +85,21 @@ library(sp)
 setwd(path.root)
 source("r_code/prjs4_sdhmR.r") # source course CRSs
 ls(pattern = "prj.") # should be 5 prj.* objects
+```
+---
 
-#--------question 1------------#
+## Question #1
+
+* Import the data type you have been assigned to work with
+* Build a buffered-presence points bounding box
+  * Buffer each point by ~50km 
+  * **CAUTION**:  make sure the pluses and minuses when buffering are in the correct direction given north, south, east, and west !! (Serious screw-ups happen here …)
+* Ensure you assign correct CRS, values, and resolution to bounding box
+
+```{r}
 setwd(path.ex)
 pers <- read.csv('spp106pr_PERS.csv')
-pers
+head(pers, 2)
 persSF <- st_as_sf(pers, coords = c('wgs_xF', 'wgs_yF'), crs = prj.wgs84)
 plot(persSF['PERS106'], col = "darkgreen", pch = 20, axes = T)
 
@@ -38,8 +111,15 @@ pers.bufSF <- st_as_sfc(st_bbox(extb, crs = prj.wgs84))
 pers.bufSF # examine
 plot(st_geometry(pers.bufSF), axes = T) # NOT RUN
 plot(persSF['PERS106'], col = "darkgreen", pch = 20, axes = T, add = T)
+```
 
-#----------Question 2---------------#
+---
+
+## Question #2
+
+* Build a fishnet for the bounding box
+
+```{r}
 setwd(path.gis)
 t1 <- raster("templateR_wgs.img") # alternative; import wgs84 template
 pers.bufSP <- as_Spatial(pers.bufSF)
@@ -80,11 +160,19 @@ st_write(pers.fnetSF, dsn = ".", layer = "pied_fnetSF", driver = "ESRI Shapefile
 
 # save objects
 setwd(path.ex) # output path
-save("pers.bufR", file = "pers.bufR.RData")
 save("pers.fnetSF", "pers.fnetDF", file = "pers.fnet.RData")
+```
 
-#-----------Question 3------------#
-pers.xy <- pers[c("wgs_xF", "wgs_yF")]  # get x,y of species persences
+---
+
+## Question #3
+
+* Use the fishnet to create a pseudo--absence data frame of [X,Y]’s
+* For simplicity’s sake, set $n$ for pseudo--absence at twice (2$\times$) the number of presences in your respective RANG, PERS, MORT, and SEED data set
+* Bind these data to the presence dataframe you imported in Question #1
+
+```{r}
+pers.xy <- pers[c("wgs_xF", "wgs_yF")]  # get x,y of species presences
 p1 <- sp::coordinates(pers.xy) # set spatial coords from pied.bufptR
 
 # extract FNETID of presence from  modelling frame
@@ -92,17 +180,22 @@ pers.fnetid <- cellFromXY(pers.bufR, p1)
 head(pers.fnetid)
 
 #checks
-length(pers.fnetid) # should match number of persistance ??
+length(pers.fnetid) # should match number of presences ??
 length(pers$PERS106) # it does ... life is good !!
 
 # create species dataframe with FNETIDs
-tru.persFNET <- cbind(pers.fnetid, pers) # add fishnet ID to tru.pers
+tru.persFNET <- cbind(pers.fnetid, pers) # add fishnet ID to tru.pres
 names(tru.persFNET)[1] <- "FNETID" # name change 
 head(tru.persFNET, 2) # examine
 
 # giggle plots
-plot(pers.bufR, col = "gray70", legend = F, main = "Points in modelling frame")  # main plot
-points(pers$wgs_xF, pers$wgs_yF, pch = 20, col = "darkgreen") # add spp locations
+plot(pers.bufR, col = "gray70",
+     legend = F,
+     main = "Points in modelling frame")  # main plot
+points(pers$wgs_xF,
+       pers$wgs_yF,
+       pch = 20,
+       col = "darkgreen") # add spp locations
 
 #extract fnetid
 buf.fnetid <- extract(pers.bufR, pers.fnetDF[c("cell.wgs_x", "cell.wgs_y")])
@@ -151,7 +244,7 @@ table(pers.indexFNET$PERS106)[[1]] # does it match w/above ?? yes !
 names(pers.indexFNET) # names make sense ?? yes !
 
 # outfile final fnet index dataframe
-setwd(path.mod2)
+setwd(path.ex)
 save(pers.indexFNET, file = "pers.indexFNET.RData")
 
 # examine the fishnet
@@ -201,22 +294,49 @@ pers.srs2$in.modFR <- 1  # assign 1 to in.modFR
 # merge with true presences for predictor extraction
 head(tru.persFNET, 2)
 head(pers.srs1, 2) # examine; both MUST have FNETID
-pers.PPsA <- merge(tru.persFNET, pers.srs1, by = c("FNETID", "PERS106", "wgs_xF", "wgs_yF"), 
+pers.PPsA <- merge(tru.persFNET,
+                   pers.srs1,
+                   by = c("FNETID", "PERS106", "wgs_xF", "wgs_yF"), 
                    all = T) # merge
 pers.PPsA$in.modFR <- NULL # drop in.modFR index no longer needed
 dim(pers.PPsA) # examine
-head(pers.PPsA, 2) # dim => No. pers + No. pers.abs
+head(pers.PPsA, 2) # dim => No. pres + No. pers.abs
 
-# create common x,y from tru pers and pseudo-abs x,y's
-pers.PPsA[352:355, ] # note diff [X,Y] coords for pers=0 & =1
+# create common x,y from tru pres and pseudo-abs x,y's
+pers.PPsA[352:355, ] # note diff [X,Y] coords for pres=0 & =1
 
 # create new vars wgs_x & wgs_y; used later in raster stack extraction
 pers.PPsA$tr.wgs_x <- ifelse(pers.PPsA$PERS106 == 0, pers.PPsA$cell.wgs_x, pers.PPsA$wgs_xF)
 pers.PPsA$tr.wgs_y <- ifelse(pers.PPsA$PERS106 == 0, pers.PPsA$cell.wgs_y, pers.PPsA$wgs_yF) 
 pers.PPsA[352:355, ] # examine a subset
 
+```
+
+---
+
+## Question #4
+
+* Save your data as R objects, including both the true presence and pseudo-absences:
+  * Dataframe
+  * Point shapefile with geometry in R
+  * Export as a point shapefile in ESRI format
+* Save these R objects in a **`.RData`** file
+* Save the bounding box as a raster--based **`.img`** file
+
+```{r}
 # resulting data frame is model training data set; outfile if desired
 setwd(path.ex)
 write.csv(pers.PPsA, file = "pers_PPsA.csv", row.names = F) # save .csv
 save(pers.PPsA, file = "pers.PPsA.RData") # save .RData
 
+writeRaster(pres.bufR,
+            filename = paste(path.figs,"/pres.bufR.img", sep =''),
+            options = c('TFW = YES'),
+            overwrite = TRUE)
+```
+
+---
+
+## The End
+
+---
