@@ -4,6 +4,7 @@
 
 ### GIT TEST
 
+#HI LINDSEY
 
 #----------Global options---------#
 #Setting Paths
