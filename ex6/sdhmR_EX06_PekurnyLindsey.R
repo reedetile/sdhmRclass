@@ -122,7 +122,6 @@ varimp.glm <- function(tr.spp,
   return(tmp.mat)
 } 
 #### END function variable importance
-#### END function variable importance
 
 # estimate VIP values => AIC & Adj deviance
 tr.vip <- pers.trTOPO[, c(2, 27:42)] # keep only P/A & predictors
@@ -163,6 +162,9 @@ abline(mean(dev.fit[, 2]),
 
 #* Eliminate redundant variables with a goal of retaining 7-10 of the 16 available
 #* Justify your decision(s) to keep / remove variables using bullets
+
+### Redundant variables don't cross mean
+### Variables that cross mean have most explanatory value
 
 #---
   
