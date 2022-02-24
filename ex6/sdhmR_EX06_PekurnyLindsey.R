@@ -8,7 +8,7 @@
 
 #----------Global options---------#
 #Setting Paths
-path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1"
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1"
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
@@ -33,7 +33,8 @@ ls(pattern = "prj.") # should be 5 prj.* objects
 ######Question 1######
 ######################
 # Break the predictor variables into logical groups of **topography**, **temperature**, and **precipitation**.  Do this by creating a new column called **`pred_type`** and add it the dataframe.
-
+setwd(path.ex)
+load('pers.trTOPO.RDATA')
 table(pers.trTOPO['PERS106'])
   
 unique(pers.trTOPO$PERS106)
