@@ -8,7 +8,8 @@
 
 #----------Global options---------#
 #Setting Paths
-path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1"
+#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1"
+path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1"
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
@@ -26,8 +27,8 @@ library(dplyr)
 
 # source course CRSs
 setwd(path.root)
-source("r_code/prjs4_sdhmR.r")# source course CRSs
-#source("C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/r_code/prjs4_sdhmR.r")
+getwd()
+source("r_code/prjs4_sdhmR.r")
 ls(pattern = "prj.") # should be 5 prj.* objects
 
 ######Question 1######
@@ -78,7 +79,6 @@ Signif <- symnum(test$p.value,
                  na = FALSE, 
                  cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
                  symbols = c("***", "**", "*", ".", " ")) 
-
 text(0.5,
      0.5,
      txt,
@@ -86,8 +86,8 @@ text(0.5,
 text(.8,
      .8,
      Signif,
-     cex=cex,
-     col=2) 
+     cex = cex,
+     col = 2) 
 }
 
 pairs(pers.trTOPO[,
@@ -122,9 +122,42 @@ varimp.glm <- function(tr.spp,
   return(tmp.mat)
 } 
 #### END function variable importance
+#### END function variable importance
 
+# estimate VIP values => AIC & Adj deviance
+tr.vip <- pers.trTOPO[, c(2, 27:42)] # keep only P/A & predictors
+pres <- 1 # column for presence:absence
+v.start <- 2 # column start predictor variables
+v.stop <- ncol(tr.vip) # last column predictor variables
+v.num <- v.stop - 1 # number predictor variables
+dev.fit <- varimp.glm(tr.vip,
+                      tr.vip,
+                      pres,
+                      v.start,
+                      v.stop) # call VIP function
+dev.fit # output matrix; col=1 AIC, col=2 Adj deviance 
 
+# built basic barplot if desired
+d.max <- ceiling(signif(max(dev.fit[, 2]), 2) * 10)/10 # max of y-axis
+ylim.r <- range(0, d.max) # range y-axis
+x.labs <- names(tr.vip[2:v.stop]) # x-axis labels
+barplot(dev.fit[, 2],
+        col = "darkgreen",
+        ylim = ylim.r,
+        main = "topo VIPs", 
+        ylab = "adj.D2",
+        names = x.labs,
+        las = 2) # barplot
+abline(h = 0) # add horizontal line
+abline(mean(dev.fit[, 2]),
+       0,
+       lt = 3) # ref lines; dash=mean adj.dev 
 
+# save plots
+#setwd(path.figs)
+#savePlot(filename = "mod2.7fig03.pdf", type = "pdf")
+######## END VARIABLE IMPORTANCE AMONG TOPOGARPHIC PREDICTORS
+################################################################################
 
 ## Question #4
 
