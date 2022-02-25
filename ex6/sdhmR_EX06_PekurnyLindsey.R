@@ -39,7 +39,19 @@ load('pers.trTOPO.RDATA')
 table(pers.trTOPO['PERS106'])
   
 unique(pers.trTOPO$PERS106)
-unique(pers.trTOPO$etpt_5)
+unique(pers.trTOPO$etpt_5.x)
+head(pers.trTOPO)
+
+##### IDEAS I HAD THAT ARN'T WORKING #################
+### Also, are we sure pers.trTOPO is built correctly? Why are there so many versions of the predictor within it?
+preds.list <- list.files(pattern = ".img$") # list of .img files; $ strips extra
+preds.list # examine
+
+pred_type <- ifelse(pres.abs$SPPRES106 != NA, 
+             extract(elev, pres.abs[, c("cell.wgs_x", "cell.wgs_y")]), 
+             extract(elev, pres.abs[, c("wgs_xF", "wgs_yF")]))
+
+###########################################
 
 ## Question #2
 #* Assess correlations:
