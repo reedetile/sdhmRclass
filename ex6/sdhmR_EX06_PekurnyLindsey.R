@@ -34,6 +34,7 @@ ls(pattern = "prj.") # should be 5 prj.* objects
 ######Question 1######
 ######################
 # Break the predictor variables into logical groups of **topography**, **temperature**, and **precipitation**.  Do this by creating a new column called **`pred_type`** and add it the dataframe.
+
 setwd(path.ex)
 load('pers.trTOPO.RDATA')
 table(pers.trTOPO['PERS106'])
@@ -42,14 +43,23 @@ unique(pers.trTOPO$PERS106)
 unique(pers.trTOPO$etpt_5.x)
 head(pers.trTOPO)
 
-##### IDEAS I HAD THAT ARN'T WORKING #################
-### Also, are we sure pers.trTOPO is built correctly? Why are there so many versions of the predictor within it?
-preds.list <- list.files(pattern = ".img$") # list of .img files; $ strips extra
-preds.list # examine
-
-pred_type <- ifelse(pres.abs$SPPRES106 != NA, 
-             extract(elev, pres.abs[, c("cell.wgs_x", "cell.wgs_y")]), 
-             extract(elev, pres.abs[, c("wgs_xF", "wgs_yF")]))
+short <- pers.trTOPO[,27:42]
+all_data <- short
+pred_groups <- data.frame(names(all_data))
+names(pred_groups) <- "Variable"
+topo = c("exp1nrm",
+         "exp3nrm",
+         "exp5nrm",
+         "prad_sw_di",
+         "rough_1k",
+         "topos")
+temp = c("tave_s_hal","tave_sprin","tmax_s_hal","tmax_summe")
+precip = c("etpt_5","etpt_6","etpt_sprin","mind_yr_av","prec_w_hal","prec_winte")
+pred_groups$pred_type = if_else(pred_groups$Variable %in% topo,
+                                "topography",
+                                if_else(pred_groups$Variable %in% temp,
+                                        "temperature",
+                                        "precipitation"))
 
 ###########################################
 
