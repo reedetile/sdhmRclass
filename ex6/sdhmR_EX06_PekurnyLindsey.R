@@ -10,6 +10,9 @@
 #Setting Paths
 path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Path
 # path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+=======
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
@@ -43,7 +46,7 @@ unique(pers.trTOPO$PERS106)
 unique(pers.trTOPO$etpt_5.x)
 head(pers.trTOPO)
 
-short <- pers.trTOPO[,27:42]
+short <- pers.trTOPO[,19:34]
 all_data <- short
 pred_groups <- data.frame(names(all_data))
 names(pred_groups) <- "Variable"
@@ -70,7 +73,7 @@ pred_groups$pred_type = if_else(pred_groups$Variable %in% topo,
 
 # numeric correlations
 cut.point <- 0.7 # set cutpoint for correlation
-c1 <- cor(pers.trTOPO[, c(27:42)],
+c1 <- cor(pers.trTOPO[, c(19:34)],
           use = "pairwise.complete.obs", 
           method = "spearman") # est. correlation
 c1 # examine
@@ -113,7 +116,7 @@ text(.8,
 }
 
 pairs(pers.trTOPO[,
-              c(27:42)],
+              c(19:34)],
       lower.panel = panel.smooth, 
       upper.panel = panel.cor,
       main = "Topo Variables") 
@@ -146,7 +149,7 @@ varimp.glm <- function(tr.spp,
 #### END function variable importance
 
 # estimate VIP values => AIC & Adj deviance
-tr.vip <- pers.trTOPO[, c(2, 27:42)] # keep only P/A & predictors
+tr.vip <- pers.trTOPO[, c(2, 19:34)] # keep only P/A & predictors
 pres <- 1 # column for presence:absence
 v.start <- 2 # column start predictor variables
 v.stop <- ncol(tr.vip) # last column predictor variables

@@ -81,7 +81,7 @@ res(topos)
 ####Question 2###
 setwd(path.ex)
 pres.abs.pers <- get(load("pers.PPsA.RData"))
-#load('pers.bufR.RData')
+load('pers.bufR.RData')
 
 setwd(path.preds)
 preds.list <- list.files(pattern = ".img$") # list of .img files; $ strips extra
@@ -101,9 +101,9 @@ pers.topoDOM <- stack(layers) # create a raster stack
 pers.topoDOM # examine stack
 
 # extract from stack 
-t1.pers <- extract(pers.topoDOM, pres.abs.pers[, c("tr.wgs_x", "tr.wgs_y")]) # extract values from raster stack
+t1.pers <- raster::extract(pers.topoDOM, pres.abs.pers[, c("tr.wgs_x", "tr.wgs_y")]) # extract values from raster stack
 # terra implementation; identical as raster extract
-#t1 <- terra::extract(pied.topoDOM, pres.abs[, c("tr.wgs_x", "tr.wgs_y")]) # basic extract
+t1 <- terra::extract(pers.topoDOM, pres.abs.pers[, c("tr.wgs_x", "tr.wgs_y")]) # basic extract
 head(t1.pers, 2) # examine extracted matrix
 pers.trTOPO <- cbind(pres.abs.pers, t1.pers) # bind to train dataframe
 head(pers.trTOPO, 2) # examine training data frame

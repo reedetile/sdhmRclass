@@ -105,7 +105,7 @@ plot(pers.bufR, col = "gray70", legend = F, main = "Points in modelling frame") 
 points(pers$wgs_xF, pers$wgs_yF, pch = 20, col = "darkgreen") # add spp locations
 
 #extract fnetid
-buf.fnetid <- extract(pers.bufR, pers.fnetDF[c("cell.wgs_x", "cell.wgs_y")])
+buf.fnetid <- raster::extract(pers.bufR, pers.fnetDF[c("cell.wgs_x", "cell.wgs_y")], na.rm = T)
 
 # create modelling dataframe with FNETIDs
 tru.bufFNET <- cbind(pers.fnetDF, buf.fnetid) # bind modelling frame w/FISHNET
@@ -201,7 +201,10 @@ pers.srs2$in.modFR <- 1  # assign 1 to in.modFR
 # merge with true presences for predictor extraction
 head(tru.persFNET, 2)
 head(pers.srs1, 2) # examine; both MUST have FNETID
-pers.PPsA <- merge(tru.persFNET, pers.srs1, by = c("FNETID", "PERS106", "wgs_xF", "wgs_yF"), 
+
+pers.PPsA <- merge(tru.persFNET, pers.srs1, by = c("FNETID", "PERS106", "wgs_xF", "wgs_yF",
+                                                   'exp5nrm','exp3nrm','rough_1k','prad_sw_di',
+                                                   'etpt_5','mind_yr_av','prec_winte','tave_sprin'), 
                    all = T) # merge
 pers.PPsA$in.modFR <- NULL # drop in.modFR index no longer needed
 dim(pers.PPsA) # examine
