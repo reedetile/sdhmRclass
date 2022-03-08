@@ -1,15 +1,19 @@
+---
+title: "EX06"
+author: "Reed Scott"
+date: "3/2/2022"
+output: html_document
+---
+
+```{r}
 #sdhmR Exercise 06
 #02/23/2022
 #RCS & LAP
 
-### GIT TEST
-
-#HI LINDSEY
-
 #----------Global options---------#
 #Setting Paths
 path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Path
-# path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
@@ -24,13 +28,18 @@ library(sf)    	# FXNS: st_as_sf, st_as_sfc, st_bbox, st_convex_hull, st_union
 library(terra)	# FXNS: as.data.frame, rast, vect
 library(sp)
 library(dplyr)
-
+library(tidyverse)
+library(data.table)
+library(modeest)
 # source course CRSs
 setwd(path.root)
 getwd()
 source("r_code/prjs4_sdhmR.r")
 ls(pattern = "prj.") # should be 5 prj.* objects
 
+```
+
+```{r}
 ######Question 1######
 ######################
 # Break the predictor variables into logical groups of **topography**, **temperature**, and **precipitation**.  Do this by creating a new column called **`pred_type`** and add it the dataframe.
@@ -47,14 +56,22 @@ short <- pers.trTOPO[,27:42]
 all_data <- short
 pred_groups <- data.frame(names(all_data))
 names(pred_groups) <- "Variable"
-topo = c("exp1nrm",
-         "exp3nrm",
-         "exp5nrm",
-         "prad_sw_di",
-         "rough_1k",
-         "topos")
-temp = c("tave_s_hal","tave_sprin","tmax_s_hal","tmax_summe")
-precip = c("etpt_5","etpt_6","etpt_sprin","mind_yr_av","prec_w_hal","prec_winte")
+topo = c("exp1nrm.img",
+         "exp3nrm.img",
+         "exp5nrm.img",
+         "prad_sw_di.img",
+         "rough_1k.img",
+         "topos.img")
+temp = c("tave_s_hal.img",
+         "tave_sprin.img",
+         "tmax_s_hal.img",
+         "tmax_summe.img")
+precip = c("etpt_5.img",
+           "etpt_6.img",
+           "etpt_sprin.img",
+           "mind_yr_av.img",
+           "prec_w_hal.img",
+           "prec_winte.img")
 pred_groups$pred_type = if_else(pred_groups$Variable %in% topo,
                                 "topography",
                                 if_else(pred_groups$Variable %in% temp,
@@ -62,7 +79,9 @@ pred_groups$pred_type = if_else(pred_groups$Variable %in% topo,
                                         "precipitation"))
 
 ###########################################
+```
 
+```{r}
 ## Question #2
 #* Assess correlations:
 #  * Among all variables; and
@@ -75,7 +94,31 @@ c1 <- cor(pers.trTOPO[, c(27:42)],
           method = "spearman") # est. correlation
 c1 # examine
 c2 <- subset(c1 > cut.point | c1 < -cut.point) # matrix of cor>cutpoint
-c2 # examine; FALSE indicates cor<cutpoint
+c2 # examine; FALSE indicates cor<cutpoint Not correlated if false?
+
+###Topo Correlations
+#############
+c3 <- cor(dplyr::select(all_data, one_of(topo)), 
+          use = "pairwise.complete.obs",
+          method = "spearman")
+c_topo <- subset(c3 > cut.point | c3 < -cut.point)
+c_topo
+
+#####
+# Temp correlations
+c4 <- cor(dplyr::select(all_data, one_of(temp)), use = "pairwise.complete.obs", method = "spearman")
+c_temp <- subset(c4 > cut.point | c4 < -cut.point)
+c_temp
+
+# Precip correlations
+c5 <- cor(dplyr::select(all_data, one_of(precip)),
+          use = "pairwise.complete.obs",
+          method = "spearman")
+c_precip <- subset(c5 > cut.point | c5 < -cut.point)
+c_precip
+
+
+###################################################################
 
 panel.cor <- function(x, y,
                       digits=2,
@@ -118,6 +161,10 @@ pairs(pers.trTOPO[,
       upper.panel = panel.cor,
       main = "Topo Variables") 
 
+```
+
+
+```{r}
 ## Question #3
 
 #* Examine variable importance of each predictor variable as related to presence:absence using the process described in the Module.     
@@ -174,19 +221,89 @@ abline(mean(dev.fit[, 2]),
        0,
        lt = 3) # ref lines; dash=mean adj.dev 
 
+
+dev.fit <- varimp.glm(tr.vip, tr.vip, pres, v.start, v.stop)
+dev.fit <- data.frame(pred_groups, dev.fit)
+
+################################
+
+### Determine VIP with GLMs
+varimp.glm <- function(tr.spp, tr.var, pres, pf, pl) {
+  tmp.mat <- matrix(ncol = 2, nrow = (pl - pf + 1))
+  for (i in pf:pl) {
+    tmp <- glm(tr.spp[, pres] ~ tr.var[, i] + I((tr.var[, i])^2), na.action = na.omit,
+               family = binomial)
+    tmp.mat[(i - pf + 1), 1] <- tmp$aic
+    tmp.mat[(i - pf + 1), 2] <- (1 - (tmp$deviance/tmp$null.deviance))
+  }
+  return(tmp.mat)
+} 
+
+tr.vip <- pers.trTOPO[, c(2, 27:42)]
+pres <- 1
+v.start <- 2
+v.stop <- ncol(tr.vip)
+v.num <- v.stop - 1
+dev.fit <- varimp.glm(tr.vip, tr.vip, pres, v.start, v.stop)
+dev.fit <- data.frame(pred_groups, dev.fit)
+setnames(dev.fit, c("X1", "X2"), c("AIC", "AdjDeviance"))
+
+dev.fit1 <- dev.fit[order(dev.fit$pred_type),]
+dev.fit$Variable <- factor(dev.fit$Variable, 
+                           levels = dev.fit$Variable[order(dev.fit$pred_type)])
+
+
+# Plot AdjDeviance by group
+```
+```{r}
+library(ggplot2)
+plot <- ggplot()+
+  geom_col(data = dev.fit, 
+           aes(Variable, 
+               AdjDeviance,
+               fill = pred_type)) +
+  scale_y_continuous(limits = c(0,0.3),
+                     expand = c(0,0))+
+  theme(axis.text.x = element_text(angle = 90,
+                                   vjust = 0.5,
+                                   hjust=1),
+        panel.background = element_blank(),
+        axis.line.x = element_line(color = "black"),
+        axis.line.y = element_line(color = "black"))
+
+plot
 # save plots
 #setwd(path.figs)
 #savePlot(filename = "mod2.7fig03.pdf", type = "pdf")
 ######## END VARIABLE IMPORTANCE AMONG TOPOGARPHIC PREDICTORS
 ################################################################################
+```
 
 ## Question #4
 
 #* Eliminate redundant variables with a goal of retaining 7-10 of the 16 available
 #* Justify your decision(s) to keep / remove variables using bullets
 
+ - We eliminated exp1nrm, exp3nrm, exp5nrm, topos, rough_1k, prad_sw_di, and prec_w_hal because of their low adjusted deviances. All other variables had higher deviances (above our cut-off) and were not highly correlated.
+
+```{r}
+remove <- c("exp1nrm.img",
+           "exp3nrm.img",
+           "exp5nrm.img",
+           "topos.img",
+           "rough_1k.img",
+           "prad_sw_di.img",
+           "prec_w_hal.img")
+
+
+tr_PERS = dplyr::select(pers.trTOPO, !one_of(remove))
+
+### Below cut-off line, get rid of
 ### Redundant variables don't cross mean
 ### Variables that cross mean have most explanatory value
+
+```
+
 
 #---
   
@@ -200,3 +317,22 @@ abline(mean(dev.fit[, 2]),
 #* Save these R objects in a **`.RData`** file
 
 #These data will be used as we next begin the SDHM model constructions.
+```{r}
+tr_PERS_SF <- st_as_sf(tr_PERS,
+                       coords = c("tr.wgs_x", "tr.wgs_y"),
+                       crs = prj.wgs84,
+                       remove = F)
+save(tr_PERS,
+     tr_PERS_SF,
+     file = "tr_PERS.Rdata")
+
+st_write(tr_PERS,
+         dsn = ".",
+         layer = "tr_PERS_SF",
+         driver = "ESRI Shapefile",
+         delete_layer = T,
+         delete_dsn = T)
+
+
+```
+
