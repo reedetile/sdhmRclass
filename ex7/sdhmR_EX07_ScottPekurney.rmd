@@ -265,6 +265,54 @@ head(mod1.acc) # examine
 * Build 2 prediction maps:
   * A raw probability estimate for each cell in the modelling domain; and
   * A classified map based on the selected threshold from Question #3
+  
+```{r}
+##########################################################################
+#Question 4: * Build 2 prediction maps:
+#A raw probability estimate for each cell in the modelling domain; and
+#A classified map based on the selected threshold from Question #3
+#------------------------------------------------------------------------
+######## START BUILD RASTER STACK
+# build stack of raster layers
+setwd(path.ex)
+load('pers.bufR.RData')
+setwd(path.preds)
+preds.list <- list.files(pattern = ".img$") # list of .img files; $ strips extra
+preds.list # examine
+
+# loop for stacking rasters
+layers <- {} # initialize (empty) list of raster layers
+for (i in 1:length(preds.list)) {
+  r1 <- crop(raster(preds.list[i]), pers.bufR) # crop pred var raster to buffer
+  names(r1) <- strsplit(preds.list[i], "_wgs.img") # assign name to raster
+  layers <- c(layers, r1) # add raster to layer of rasters
+}
+layers # examine raster stack; return is a list of raster layers
+
+# build the raster stack
+pers.DOM <- stack(layers) # create a raster stack
+pers.DOM # examine stac
+######## END BUILD RASTER STACK
+################################################################################
+setwd(path.gis)
+states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
+
+#create a probability model
+pers.prob <- predict(mod1.LR, tr_PERS, 
+                       type = "response", fun = predict, index = 2, overwrite = T) # prediction raster
+pers.prob # examine 
+
+# next reclassify based on threshold mod.cut per above
+pers.class <- reclassify(pers.prob, c(0,mod.cut[[2]],0, 
+                                         mod.cut[[2]],1,1))
+# giggle maps
+par(mfrow = c(1, 2))
+plot(pers.prob, legend = F, axes = T, main = "Probability Map") # plot probability map
+plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
+plot(pers.class, legend = F, axes = T, main = "Classification Map") # plot classification map
+plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
+par(mfrow = c(1, 1))
+```
 
 ---
 
@@ -278,8 +326,13 @@ head(mod1.acc) # examine
 
 These data will be used again in Module 10, Ensemble Models.
 
+```{r}
+setwd(path.ex)
+save.image(pers.class,pers.prob,file='ex7maps.img')
+save(mod.cut,mod1.acc,pers.class,pers.prob, file = 'ex7.RData')
+save.image()
+```
 ---
 
 ## The End
-
 ---

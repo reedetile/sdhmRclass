@@ -44,18 +44,7 @@ drops <- c('wgs_xF','wgs_yF','cell.wgs_x','cell.wgs_y','exp5nrm','exp3nrm','roug
 tr_PERS <- tr_PERS[ ,!(names(tr_PERS) %in% drops)]
 tr_PERS <- na.omit(tr_PERS)
 dim(tr_PERS)
-#attempt to use for() loop
-descSTAT <- {}
-descSTAT <- as.data.frame(descSTAT)
-for(i in 27:length(tr_PERS)){
-  mean <- mean(tr_PERS[,i], na.rm = T) #mean returned NA
-  NAS <- sum(is.na(tr_PERS[,i])) #checked for number of NAs
-  SD <- sd(tr_PERS[,i], na.rm = T) #standard deviation
-  N <- nrow(tr_PERS) - sum(is.na(tr_PERS[,i])) #check total N
-  rname <- names(tr_PERS[,i])
-  stats <- c(rname, mean, NAS, SD, N)
-  descSTAT <- rbind(descSTAT, stats)
-}
+
 
 #explore etpt5
 mean(tr_PERS$etpt_5.img, na.rm = T) #mean returned NA
@@ -224,17 +213,28 @@ setwd(path.gis)
 states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
 
 #create a probability model
-pers.prob <- predict(pers.DOM, tr_PERS, 
-                       type = "prob", fun = predict, index = 2, overwrite = T) # prediction raster
+pers.prob <- predict(pers.DOM, mod1.LR, 
+                       type = "response", fun = predict, index = 2, overwrite = T) # prediction raster
 pers.prob # examine 
 
 # next reclassify based on threshold mod.cut per above
-pers.class <- reclassify(mod1.pred, c(0,mod.cut[[2]],0, 
-                                         mod.cut[[2]],1,1))
-# giggle maps
-par(mfrow = c(1, 2))
-plot(mod1.LR.pred, legend = F, axes = T, main = "Probability Map") # plot probability map
-plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
+pers.class <- reclassify(pers.prob, c(0,mod.cut[[2]],0, 
+                                         mod.cut[[2]],1,1),overwrite=TRUE)
+#Plot probability map#
+plot(pers.prob, axes = T, main = 'Probability Map')
+plot(st_geometry(states), add = T, lwd = 1.5)
+
+#Classification Map#
 plot(pers.class, legend = F, axes = T, main = "Classification Map") # plot classification map
 plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
-par(mfrow = c(1, 1))
+
+#############################################################################
+#Question 5: save your data asn an R object
+#Accuracy metrics as a dataframe;
+#Classification threshold as a stand--alone scalar
+#Both prediction maps as **`.img`** format
+#Save these R objects in a **`.RData`** file
+setwd(path.ex)
+save.image(pers.class,pers.prob,file='ex7maps.img')
+save(mod.cut,mod1.acc,pers.class,pers.prob, file = 'ex7.RData')
+save.image()
