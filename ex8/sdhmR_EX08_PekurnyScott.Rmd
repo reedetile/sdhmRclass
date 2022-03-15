@@ -1,0 +1,124 @@
+---
+title: "Exercise Title Goes Here"
+author: "Your Name Goes Here"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
+
+<!-- These are global options  
+       set root directory here 
+       NOTE mine is active; yours is commented out
+       change the path to reflect your CPU,
+       then comment out or delete mine
+--> 
+```{r global_options, include=FALSE}
+knitr::opts_knit$set(root.dir = "~/words/classes/sdmR_ALLversions/sdhmR-V2022.1")
+#knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
+knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
+```
+
+---
+
+## This exercise links to Module 5.2
+
+Submit the completed exercise to us at:
+
+* t.edwards@usu.edu 
+* eric_tsakiris@fws.gov  
+
+---
+
+## Context
+
+The data are of the *Pinus edulis* Common piñon, the species you dealt with in Exercise #3 -- #5.  This exercise relies on the dataframe you generated in exercise #6.  Hopefully you saved those combined presence:absence dataframe, with the reduced variables you begin SDHM model construction with, or regrettably you will need to return to exercise #6 and re--build that dataframe.
+
+The goal is to:
+* Variables in final model, significance, and direction of relationship
+  * List which variables are "smoothed" vs, those that are not
+* Plots of the "smoothed" variables
+* Calculate an estimate of model fit
+* Build a table of accuracy metrics, and AUC plot
+* Provide some bulleted interpretation points
+* Plot map products of the:
+  * (i) probability; and 
+  * (ii) classified distribution model
+  * (Save these two maps as **`.img`** files for use later in the course)
+
+
+Remember, you will have been assigned data for *edulis* having one the following four discrete labels:
+
+* **Seedlings**:  these data indicate spatial locations where seedlings of the tree have been found
+* **Mortality**: these data indicate spatial locations where mortality has been observed
+* **Persistence**: these data have no observed mortality or seedling at given spatial locations
+* **Range**: the total dataset, including all spatial locations of seedlings, mortality, and persistence
+
+---
+
+## The Data
+
+* The dataframe completed in exercise #6.
+
+---
+
+## Question #1
+
+* Import and explore data
+  * **NOTE**:  intent is not to reduce number of variables; that was completed in exercise #5.  Rather, calculate simple descriptive statistics (mean, sd, n) and boxplots
+
+
+```{r}
+# code for the question goes inside chunks, if part of the exercise solution.
+#  If not part of the exercise questions delete this.
+#  NOTE: do NOT answer all questions from within the same chunk
+```
+
+**YET ANOTHER NOTE RELATED TO CODE:**  
+If King's English interpretation is required, it will go here, after each code chunk.
+
+---
+
+## Question #2
+
+* Construct some basic plots to assess possible relationships warranting use of a GAM
+* List which variables may be amenable to a GAM--based smoother
+
+---
+
+## Question #3
+
+* Construct a set of GAMs from fully linear to a maximum of 5 splines
+  * Use lowess smoother rather than default spline
+
+---
+
+## Question #4
+
+* Calculate accuracy metrics (as in Module 3.2 and 3.3, Analytical Intermission) using:
+  * Resubstitution approaches, and
+  * A 10-fold cross--validation approach
+
+---
+
+## Question #5
+
+* Build 2 prediction maps:
+  * A raw probability estimate for each cell in the modelling domain; and
+  * A classified map based on the selected threshold from Question #4
+
+---
+
+## Question #6
+
+* Save your data as R objects:
+  * Accuracy metrics as a dataframe;
+  * Classification threshold as a stand--alone scalar
+  * Both prediction maps as **`.img`** format
+* Save these R objects in a **`.RData`** file
+
+These data will be used again in Module 10, Ensemble Models.
+
+---
+
+## The End
+
+---
