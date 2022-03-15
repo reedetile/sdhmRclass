@@ -12,7 +12,7 @@ output: html_document
        then comment out or delete mine
 --> 
 ```{r global_options, include=FALSE}
-knitr::opts_knit$set(root.dir = "~/words/classes/sdmR_ALLversions/sdhmR-V2022.1")
+knitr::opts_knit$set(root.dir = "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1")
 #knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
 knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
 ```
@@ -59,8 +59,8 @@ Remember, you will have been assigned data for *edulis* having one the following
 ```{r global option}
 #----------Global options---------#
 #Setting Paths
-path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
-#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
