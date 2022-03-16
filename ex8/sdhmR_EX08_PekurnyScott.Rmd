@@ -12,20 +12,30 @@ output: html_document
        then comment out or delete mine
 --> 
 ```{r global_options, include=FALSE}
-knitr::opts_knit$set(root.dir = "~/words/classes/sdmR_ALLversions/sdhmR-V2022.1")
+knitr::opts_knit$set(root.dir = "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8")
 #knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
-knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
+knitr::opts_chunk$set(warning=FALSE,
+                      error= FALSE,
+                      message=FALSE)
 ```
 
 ```{r global option}
 #----------Global options---------#
 #Setting Paths
 #path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
-path.root <- "C:/Users/14842/Documents/SDHM_Reed" #Lindsey Path
-path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
-path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
-path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
-path.gis <- paste(path.root, "/data/gis_layers", sep = "") #path to gis files
+path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.ex <- paste(path.root,
+                 "/data/exercise/traindat",
+                 sep = "") #Path to mod 2
+path.preds <- paste(path.root,
+                    '/data/exercise/preds',
+                    sep = '')
+path.figs <- paste(path.root,
+                   "/powerpoints/figures",
+                   sep = "") #path to save figs
+path.gis <- paste(path.root,
+                  "/data/gis_layers",
+                  sep = "") #path to gis files
 
 # some libraries
 library(raster)	# FXNS: extent, raster, res, rasterize, values, writeRaster, 
@@ -47,7 +57,7 @@ library(modeest)
 # source course CRSs
 setwd(path.root)
 getwd()
-source("r_code/prjs4_sdhmR.r")
+source("C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/r_code/prjs4_sdhmR.r")
 ls(pattern = "prj.") # should be 5 prj.* objects
 ```
 ---
@@ -103,12 +113,24 @@ Remember, you will have been assigned data for *edulis* having one the following
 
 ############################
 #Question 1: Import and explore the data
+
 load('C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex6/tr_PERS.Rdata')
 class(tr_PERS)
 head(tr_PERS)
-drops <- c('wgs_xF','wgs_yF','cell.wgs_x','cell.wgs_y','exp5nrm','exp3nrm','rough_1k','prad_sw_di',
-           'etpt_5','mind_yr_av','prec_winte','tave_sprin','UNIQUEID.x'
-           ,'UNIQUEID.y')
+drops <- c('wgs_xF',
+           'wgs_yF',
+           'cell.wgs_x',
+           'cell.wgs_y',
+           'exp5nrm',
+           'exp3nrm',
+           'rough_1k',
+           'prad_sw_di',
+           'etpt_5',
+           'mind_yr_av',
+           'prec_winte',
+           'tave_sprin',
+           'UNIQUEID.x',
+           'UNIQUEID.y')
 tr_PERS <- tr_PERS[ ,!(names(tr_PERS) %in% drops)]
 tr_PERS <- na.omit(tr_PERS)
 dim(tr_PERS)
@@ -116,20 +138,29 @@ dim(tr_PERS)
 #attempt to use for() loop
 descSTAT <- {}
 descSTAT <- as.data.frame(descSTAT)
-for(i in 27:length(tr_PERS)){
-  mean <- mean(tr_PERS[,i], na.rm = T) #mean returned NA
+for(i in 13:length(tr_PERS)){
+  mean <- mean(tr_PERS[,i],
+               na.rm = T) #mean returned NA
   NAS <- sum(is.na(tr_PERS[,i])) #checked for number of NAs
-  SD <- sd(tr_PERS[,i], na.rm = T) #standard deviation
+  SD <- sd(tr_PERS[,i],
+           na.rm = T) #standard deviation
   N <- nrow(tr_PERS) - sum(is.na(tr_PERS[,i])) #check total N
   rname <- names(tr_PERS[,i])
-  stats <- c(rname, mean, NAS, SD, N)
-  descSTAT <- rbind(descSTAT, stats)
+  stats <- c(rname,
+             mean,
+             NAS,
+             SD,
+             N)
+  descSTAT <- rbind(descSTAT,
+                    stats)
 }
 
 #explore etpt5
-mean(tr_PERS$etpt_5.img, na.rm = T) #mean returned NA
+mean(tr_PERS$etpt_5.img,
+     na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$etpt_5.img)) #checked for number of NAs
-sd(tr_PERS$etpt_5.img, na.rm = T) #standard deviation
+sd(tr_PERS$etpt_5.img,
+   na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_5.img)) #check total N
 
 #explore etpt6
@@ -137,38 +168,45 @@ mean(tr_PERS$etpt_6.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$etpt_6.img)) #checked for number of NAs
 sd(tr_PERS$etpt_6.img, na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_6.img)) #check total N
+
 #explore etpt_sprin
 mean(tr_PERS$etpt_sprin.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$etpt_sprin.img)) #checked for number of NAs
 sd(tr_PERS$etpt_sprin.img, na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_sprin.img)) #check total N
+
 #explore mind_yr_ave
 mean(tr_PERS$mind_yr_av.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$mind_yr_av.img)) #checked for number of NAs
 sd(tr_PERS$mind_yr_av.img, na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$mind_yr_av.img)) #check total N
+
 #explore prec_winte
 mean(tr_PERS$prec_winte.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$prec_winte.img)) #checked for number of NAs
 sd(tr_PERS$prec_winte.img, na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$prec_winte.img)) #check total N
+
 #explore tave_s_hal
 mean(tr_PERS$tave_s_hal.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$tave_s_hal.img)) #checked for number of NAs
 sd(tr_PERS$tave_s_hal.img, na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$tave_s_hal.img)) #check total N
+
 #explore tave_sprin
 mean(tr_PERS$tave_sprin.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$tave_sprin.img)) #checked for number of NAs
 sd(tr_PERS$tave_sprin.img, na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$tave_sprin.img)) #check total N
+
 #explore tmax_summe
 mean(tr_PERS$tmax_summe.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$tmax_summe.img)) #checked for number of NAs
 sd(tr_PERS$tmax_summe.img, na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$tmax_summe.img)) #check total N
+```
 
-
+```{r}
 #Boxplots
 par(mfrow = c(3, 3))
 boxplot(tr_PERS$etpt_5.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
