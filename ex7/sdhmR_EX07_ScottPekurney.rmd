@@ -1,6 +1,6 @@
 ---
 title: "Exercise Title Goes Here"
-author: "Your Name Goes Here"
+author: "Reed Scott & Lindsey Pekurney"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_document
 ---
@@ -12,7 +12,12 @@ output: html_document
        then comment out or delete mine
 --> 
 ```{r global_options, include=FALSE}
+
 knitr::opts_knit$set(root.dir = "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1")
+
+knitr::opts_knit$set(root.dir = "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1") #Reed Path
+#knitr::opts_knit$set(root.dir ="C:/Users/14842/Documents/SDHM/sdhmR-V2022.1") #Lindsey Path
+
 #knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
 knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
 ```
@@ -78,6 +83,9 @@ library(dplyr)
 library(tidyverse)
 library(data.table)
 library(modeest)
+library(DAAG)
+library(PresenceAbsence)
+library(rgdal)
 # source course CRSs
 setwd(path.root)
 getwd()
@@ -95,22 +103,16 @@ ls(pattern = "prj.") # should be 5 prj.* objects
 ```{r}
 ############################
 #Question 1: Import and explore the data
+setwd(path.ex)
 load('tr_PERS.Rdata')
 class(tr_PERS)
 head(tr_PERS)
-
-#attempt to use for() loop
-descSTAT <- {}
-descSTAT <- as.data.frame(descSTAT)
-for(i in 27:length(tr_PERS)){
-  mean <- mean(tr_PERS[,i], na.rm = T) #mean returned NA
-  NAS <- sum(is.na(tr_PERS[,i])) #checked for number of NAs
-  SD <- sd(tr_PERS[,i], na.rm = T) #standard deviation
-  N <- nrow(tr_PERS) - sum(is.na(tr_PERS[,i])) #check total N
-  rname <- names(tr_PERS[,i])
-  stats <- c(rname, mean, NAS, SD, N)
-  descSTAT <- rbind(descSTAT, stats)
-}
+drops <- c('wgs_xF','wgs_yF','cell.wgs_x','cell.wgs_y','exp5nrm','exp3nrm','rough_1k','prad_sw_di',
+           'etpt_5','mind_yr_av','prec_winte','tave_sprin','UNIQUEID.x'
+           ,'UNIQUEID.y')
+tr_PERS <- tr_PERS[ ,!(names(tr_PERS) %in% drops)]
+tr_PERS <- na.omit(tr_PERS)
+dim(tr_PERS)
 
 #explore etpt5
 mean(tr_PERS$etpt_5.img, na.rm = T) #mean returned NA
@@ -228,6 +230,7 @@ Based on deviance, both the full model and the reduced model had a model fit of 
 * Calculate accuracy metrics (as in Module 3.2 and 3.3, Analytical Intermission) using:
   * Resubstitution approaches, and
   * A 10-fold cross--validation approach
+  
 ```{r}
 pers <- 'PERS106'
 #Resubstitution
@@ -298,20 +301,20 @@ setwd(path.gis)
 states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
 
 #create a probability model
-pers.prob <- predict(mod1.LR, tr_PERS, 
+pers.prob <- predict(pers.DOM, mod1.LR, 
                        type = "response", fun = predict, index = 2, overwrite = T) # prediction raster
 pers.prob # examine 
 
 # next reclassify based on threshold mod.cut per above
 pers.class <- reclassify(pers.prob, c(0,mod.cut[[2]],0, 
-                                         mod.cut[[2]],1,1))
-# giggle maps
-par(mfrow = c(1, 2))
-plot(pers.prob, legend = F, axes = T, main = "Probability Map") # plot probability map
-plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
+                                         mod.cut[[2]],1,1),overwrite=TRUE)
+#Plot probability map#
+plot(pers.prob, axes = T, main = 'Probability Map')
+plot(st_geometry(states), add = T, lwd = 1.5)
+
+#Classification Map#
 plot(pers.class, legend = F, axes = T, main = "Classification Map") # plot classification map
 plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
-par(mfrow = c(1, 1))
 ```
 
 ---

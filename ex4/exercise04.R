@@ -152,7 +152,7 @@ table(pers.indexFNET$PERS106)[[1]] # does it match w/above ?? yes !
 names(pers.indexFNET) # names make sense ?? yes !
 
 # outfile final fnet index dataframe
-setwd(path.mod2)
+setwd(path.ex)
 save(pers.indexFNET, file = "pers.indexFNET.RData")
 
 # examine the fishnet
