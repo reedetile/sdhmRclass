@@ -4,8 +4,8 @@
 
 #----------Global options---------#
 #Setting Paths
-#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1"
-path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1"
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1"
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1"
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
 path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
 path.gis <- paste(path.root, "/data/gis_layers", sep = "") #path to gis files
@@ -222,5 +222,6 @@ pers.PPsA[352:355, ] # examine a subset
 # resulting data frame is model training data set; outfile if desired
 setwd(path.ex)
 write.csv(pers.PPsA, file = "pers_PPsA.csv", row.names = F) # save .csv
-save(pers.PPsA, file = "pers.PPsA.RData") # save .RData
+save(pers.PPsA, pers.bufpt, pers.bufR, pers.bufSF, pers.bufSP,
+     file = "pers.PPsA.RData") # save .RData
 

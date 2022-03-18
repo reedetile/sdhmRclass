@@ -143,7 +143,8 @@ pers.tst <- PERS.xy[fold == 1, ] # build test data; the 20%
 pers.tr <- PERS.xy[fold != 1, ] # build training data; the 80%
 
 # run maxent model; requires dismo
-mod1.MAX <- maxent(pers.dom, pers.tr) # basic maxent w/training x,y data 
+n.col <- ncol(tr_PERS)
+mod1.MAX <- maxent(x = tr_PERS[5:n.col],p = tr_PERS[2]) # call for true pers/abs 
 mod1.MAX
 plot(mod1.MAX)
 
@@ -152,6 +153,29 @@ plot(mod1.MAX)
 # * Calculate accuracy metrics (as in Module 3.2 and 3.3, Analytical Intermission) using:
 # * Resubstitution approaches, and
 # * A 10-fold cross--validation approach
+
+
+
+
+pers <- 'PERS106'
+#Resubstitution
+mod1.MAX.pred <- predict(mod1.MAX, tr_PERS)
+head(mod1.MAX.pred)
+modl <- 'mod1.MAX'
+dat2 <- cbind(modl,tr_PERS[2],mod1.MAX.pred)
+head(dat2)
+names(pers.dom)
+names(pers.dom) <- paste(names(pers.dom),'img')
+mod1.val <- evaluate(model = mod1.MAX, p = tr_PERS[tr_PERS$PERS106 == 1, c(3:4)], 
+                     a = tr_PERS[tr_PERS$PERS106 == 0, c(3:4)], 
+                     x = pers.dom)
+mod1.val
+threshold(mod1.val)
+mod.cut <- threshold(mod1.val)
+mod.cut
+mod1.acc <- presence.absence.accuracy(dat2, threshold = mod.cut[[2]],st.dev=F)
+tss <- mod1.acc$sensitivity + mod1.acc$specificity
+
 
 # Simple 10 fold code
 set.seed(1234) # set.seed for repeatability
@@ -162,52 +186,58 @@ xfold <- 10 # set No. xfolds
 for (i in 1:xfold) {
         tr <- tr_PERS[pers.xf != i, ] # training not eq. i
         te <- tr_PERS[pers.xf == i, ] # test eq. i
-        mx <- maxent(tr_PERS[5:ncol(tr_PERS)], tr_PERS[2], data = tr) # maxent model on training. first value = predictors, second = pres/abs
+        mx <- maxent(tr_PERS[5:ncol(tr_PERS)], tr_PERS[2], data = tr) 
+        # maxent model on training. first value = predictors, second = pres/abs
         mod1.predXF[pers.xf == i] <- predict(mx, te) # predict to test
 }
 head(mod1.predXF) # examine vector xfold prediction 
 
-# generate confusion matrix; see help(theshold) for maxent threshold options
-# evaluate model (an x-fold process: see help(evaluate))
-mod1.val <- evaluate(mod1.MAX, p = tr_PERS[tr_PERS$PERS106 == 1, c(3:4)], 
-                     a = tr_PERS[tr_PERS$PERS106 == 0, c(3:4)], x = pers.dom) # x-fold cross-val
-mod1.val # examine
-threshold(mod1.val) # view maxent thresholds 
-#   here use spec_sens: highest sum of sens & spec
-modl <- 'mod1.MAX'
-pers.max.XF <- cbind(modl, tr_PERS[2], mod1.predXF) # build dataframe w/mod1 predictions
-head(pers.max.XF, 2) # examine prediction dataframe
-mod.cutXF <- threshold(mod1.val)
-mod.cutXF # view maxent thresholds
-mod1.cfmatXF <- table(pers.max.XF[[2]], factor(as.numeric(pers.max.XF$mod1.predXF >= mod.cutXF$equal_sens_spec)))
-mod1.cfmatXF
-########################################################################################################
-
-pers <- 'PERS106'
-#Resubstitution
-mod1.MAX.pred <- predict(pers.dom, mod1.MAX, type = 'prob')
-head(mod1.MAX.pred)
-
-#10x cross-val
-set.seed(1234) # set and save seed if desire replicability of samples
-glm.cv10 <- CVbinary(mod1.MAX, nfolds = 10, print.details = F) # cross validate model w/10 folds
-ls(glm.cv10) # examine crossval object
-head(glm.cv10$cvhat) # examine 
-
-
 
 # examine resubstitution and cross-validation estimates
 head(mod1.MAX.pred) # examine resub prediction
-head(glm.cv10$cvhat) # examine xval prediction
-glm.cvpred <- glm.cv10$cvhat # assign new name to crossval estimates
-cross.val <- cbind(pers, tr_PERS[2], mod1.MAX.pred, glm.cvpred) # build dataframe
+head(mod1.predXF) # examine xval prediction
+cross.val <- cbind(modl, tr_PERS[2], mod1.predXF) # build dataframe
 head(cross.val, 2) # examine; NOTE will differ each run unless seed is saved 
 
-#set threshold using PresenceAbsence package + calculate model accuratcies
-mod.cut <- optimal.thresholds(cross.val, opt.methods = c("ObsPrev")) # threshold=PREVALENCE
-mod.cut # examine threshold=PREVALENCE
+#calculate model accuracies#
+mod1.accXF <- presence.absence.accuracy(cross.val, threshold = mod.cut[[2]],st.dev=F)
+tss <- mod1.accXF$sensitivity + mod1.acc$specificity - 1
+mod1.accXF <- cbind(mod1.acc[1:7],tss)
+mod1.accXF
 
-mod1.acc <- presence.absence.accuracy(cross.val, threshold = mod.cut$mod1.MAX.pred)
-tss <- mod1.acc$sensitivity + mod1.acc$specificity - 1 # code TSS metric
-mod1.acc <- cbind(mod1.acc[1:7], tss) # bind all metrics
-head(mod1.acc) # examine
+############################################################################################
+## Question #4
+
+## Question #4
+# * Build 2 prediction maps:
+#         * A raw probability estimate for each cell in the modelling domain; and
+# * A classified map based on the selected threshold from Question #4
+
+setwd(path.gis)
+states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
+
+#create a probability model
+pers.prob <- predict(pers.dom, mod1.MAX, 
+                     type = "response", fun = predict, index = 2, overwrite = T) # prediction raster
+pers.prob # examine 
+
+# next reclassify based on threshold mod.cut per above
+pers.class <- reclassify(pers.prob, c(0,mod.cut[[2]],0, 
+                                      mod.cut[[2]],1,1),overwrite=TRUE)
+pers.class
+
+#restrict class and prob models to domain
+setwd(path.ex)
+load('pers.PPsA.RData')
+pres.bufpt <-raster(pers.bufR)
+plot(pers.bufR)
+new.pers.bufR <- projectRaster(pers.bufR, pers.class)
+pers.class <- pers.class*new.pers.bufR
+pers.prob <- pers.prob*new.pers.bufR
+#Plot probability map#
+plot(pers.prob, axes = T, main = 'Probability Map')
+plot(st_geometry(states), add = T, lwd = 1.5)
+
+#Classification Map#
+plot(pers.class, legend = F, axes = T, main = "Classification Map") # plot classification map
+plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
