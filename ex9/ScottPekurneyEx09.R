@@ -217,27 +217,36 @@ setwd(path.gis)
 states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
 
 #create a probability model
-pers.prob <- predict(pers.dom, mod1.MAX, 
+pers.prob.MAX <- predict(pers.dom, mod1.MAX, 
                      type = "response", fun = predict, index = 2, overwrite = T) # prediction raster
-pers.prob # examine 
+pers.prob.MAX # examine 
 
 # next reclassify based on threshold mod.cut per above
-pers.class <- reclassify(pers.prob, c(0,mod.cut[[2]],0, 
+pers.class.MAX <- reclassify(pers.prob.MAX, c(0,mod.cut[[2]],0, 
                                       mod.cut[[2]],1,1),overwrite=TRUE)
-pers.class
+pers.class.MAX
 
 #restrict class and prob models to domain
 setwd(path.ex)
 load('pers.PPsA.RData')
 pres.bufpt <-raster(pers.bufR)
 plot(pers.bufR)
-new.pers.bufR <- projectRaster(pers.bufR, pers.class)
-pers.class <- pers.class*new.pers.bufR
-pers.prob <- pers.prob*new.pers.bufR
+new.pers.bufR <- projectRaster(pers.bufR, pers.class.MAX)
+pers.class.MAX <- pers.class.MAX*new.pers.bufR
+pers.prob.MAX <- pers.prob.MAX*new.pers.bufR
+
+par(mfrow=c(1,1))
 #Plot probability map#
-plot(pers.prob, axes = T, main = 'Probability Map')
-plot(st_geometry(states), add = T, lwd = 1.5)
+plot(pers.prob.MAX, axes = T, main = 'Probability Map')
+plot(st_geometry(states), add = T)
 
 #Classification Map#
-plot(pers.class, legend = F, axes = T, main = "Classification Map") # plot classification map
+plot(pers.class.MAX, legend = F, axes = T, main = "Classification Map") # plot classification map
 plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
+
+#########################################################################3
+#Question 5: Save your data
+setwd(path.ex)
+save.image(pers.class.MAX ,pers.prob.MAX,  file= 'ex9.RData')
+save(cross.val,dat2,mod.cut,mod1.acc,mod1.accXF,mod1.MAX,mod1.val,mx,pers.class.MAX,pers.prob.MAX,PERS.xy, file = 'ex9.RData')
+save.image()

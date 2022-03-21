@@ -1,6 +1,6 @@
 ---
-title: "Exercise Title Goes Here"
-author: "Your Name Goes Here"
+title: "Exercise 8"
+author: "Group J: Reed Scott & Lindsey Pekurney"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_document
 ---
@@ -18,6 +18,39 @@ knitr::opts_knit$set(root.dir = "D:/OneDrive - University of Vermont/Classes/Spr
 knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
 ```
 
+```{r Paths, Libraries, Projections}
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
+path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
+path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
+path.gis <- paste(path.root, "/data/gis_layers", sep = "") #path to gis files
+
+# some libraries
+library(raster)	# FXNS: extent, raster, res, rasterize, values, writeRaster, 
+#       cellFromXY, extract
+library(sf)    	# FXNS: st_as_sf, st_as_sfc, st_bbox, st_convex_hull, st_union
+#       st_buffer, st_read, st_write, st_intersection, st_geometry,
+#       st_drop_geometry, st_coordinates, st_sf
+library(terra)	# FXNS: as.data.frame, rast, vect
+library(sp)
+library(dplyr)
+library(tidyverse)
+library(data.table)
+library(modeest)
+library(DAAG)
+library(PresenceAbsence)
+options("rgdal_show_exportToProj4_warnings"="none") # run this before library(rgdal)
+library(rgdal)
+library(dismo)
+library(maptools)
+
+# source course CRSs
+setwd(path.root)
+getwd()
+source("r_code/prjs4_sdhmR.r")
+ls(pattern = "prj.") # should be 5 prj.* objects
+```
 ---
 
 ## This exercise links to Module 5.3
@@ -63,7 +96,7 @@ Remember, you will have been assigned data for *edulis* having one the following
   * **NOTE**:  intent is not to reduce number of variables; that was completed in exercise #5.  Rather, calculate simple descriptive statistics (mean, sd, n) and boxplots
 
 
-```{r}
+```{r Import data}
 setwd(path.ex)
 load('tr_PERS.RData')
 class(tr_PERS)
@@ -74,8 +107,9 @@ drops <- c('wgs_xF','wgs_yF','cell.wgs_x','cell.wgs_y','exp5nrm','exp3nrm','roug
 tr_PERS <- tr_PERS[ ,!(names(tr_PERS) %in% drops)]
 tr_PERS <- na.omit(tr_PERS)
 dim(tr_PERS)
+```
 
-
+```{r Explore Data}
 #explore etpt5
 mean(tr_PERS$etpt_5.img, na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$etpt_5.img)) #checked for number of NAs
@@ -151,7 +185,7 @@ At a glance, every variable beslies etpt5 looks like it could correlate with pre
 * Construct a MAXENT model using the presence:absence data
 * Build plots of variable importance values
 
-```{r}
+```{r Maxent Model}
 head(tr_PERS,2)
 PERS.xy <- tr_PERS[,3:4]
 #Building raster stack + domain
@@ -170,7 +204,8 @@ pers.tst <- PERS.xy[fold == 1, ] # build test data; the 20%
 pers.tr <- PERS.xy[fold != 1, ] # build training data; the 80%
 
 # run maxent model; requires dismo
-mod1.MAX <- maxent(pers.dom, pers.tr) # basic maxent w/training x,y data 
+n.col <- ncol(tr_PERS)
+mod1.MAX <- maxent(x = tr_PERS[5:n.col],p = tr_PERS[2]) # call for true pers/abs 
 mod1.MAX
 plot(mod1.MAX)
 
@@ -242,8 +277,39 @@ mod1.accXF
 * Build 2 prediction maps:
   * A raw probability estimate for each cell in the modelling domain; and
   * A classified map based on the selected threshold from Question #4
+  
+```{r Mapping}
+setwd(path.gis)
+states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
 
----
+#create a probability model
+pers.prob <- predict(pers.dom, mod1.MAX, 
+                     type = "response", fun = predict, index = 2, overwrite = T) # prediction raster
+pers.prob # examine 
+
+# next reclassify based on threshold mod.cut per above
+pers.class <- reclassify(pers.prob, c(0,mod.cut[[2]],0, 
+                                      mod.cut[[2]],1,1),overwrite=TRUE)
+pers.class
+
+#restrict class and prob models to domain
+setwd(path.ex)
+load('pers.PPsA.RData')
+pres.bufpt <-raster(pers.bufR)
+plot(pers.bufR)
+new.pers.bufR <- projectRaster(pers.bufR, pers.class)
+pers.class <- pers.class*new.pers.bufR
+pers.prob <- pers.prob*new.pers.bufR
+
+par(mfrow=c(1,1))
+#Plot probability map#
+plot(pers.prob, axes = T, main = 'Probability Map')
+plot(st_geometry(states), add = T)
+
+#Classification Map#
+plot(pers.class, legend = F, axes = T, main = "Classification Map") # plot classification map
+plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
+```
 
 ## Question #5
 
@@ -254,6 +320,13 @@ mod1.accXF
 * Save these R objects in a **`.RData`** file
 
 These data will be used again in Module 10, Ensemble Models.
+
+```{r Save Data}
+setwd(path.ex)
+save.image(pers.class.MAX ,pers.prob.MAX,  file= 'ex9.RData')
+save(cross.val,dat2,mod.cut,mod1.acc,mod1.accXF,mod1.MAX,mod1.val,mx,pers.class.MAX,pers.prob.MAX,PERS.xy, file = 'ex9.RData')
+save.image()
+```
 
 ---
 
