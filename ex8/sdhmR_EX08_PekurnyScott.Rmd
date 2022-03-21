@@ -1,11 +1,10 @@
 ---
-title: "Exercise Title Goes Here"
-author: "Your Name Goes Here"
+title: "Exercise 8"
+author: "Group J: Lindsey Pekurney and Reed Scott"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: html_document
 ---
 
-**YO LINDSEY WTF**
 <!-- These are global options  
        set root directory here 
        NOTE mine is active; yours is commented out
@@ -13,18 +12,17 @@ output: html_document
        then comment out or delete mine
 --> 
 ```{r global_options, include=FALSE}
-knitr::opts_knit$set(root.dir = "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8")
+knitr::opts_knit$set(root.dir = "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1") #Reed Path
+#knitr::opts_knit$set(root.dir ="C:/Users/14842/Documents/SDHM/sdhmR-V2022.1") #Lindsey Path
 #knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
-knitr::opts_chunk$set(warning=FALSE,
-                      error= FALSE,
-                      message=FALSE)
+knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
 ```
 
 ```{r global option}
 #----------Global options---------#
 #Setting Paths
-#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
-path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.ex <- paste(path.root,
                  "/data/exercise/traindat",
                  sep = "") #Path to mod 2
@@ -58,7 +56,7 @@ library(modeest)
 # source course CRSs
 setwd(path.root)
 getwd()
-source("C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/r_code/prjs4_sdhmR.r")
+source("r_code/prjs4_sdhmR.r")
 ls(pattern = "prj.") # should be 5 prj.* objects
 ```
 ---
@@ -114,8 +112,8 @@ Remember, you will have been assigned data for *edulis* having one the following
 
 ############################
 #Question 1: Import and explore the data
-
-load('C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex6/tr_PERS.Rdata')
+setwd(path.ex)
+load('tr_PERS.Rdata')
 class(tr_PERS)
 head(tr_PERS)
 drops <- c('wgs_xF',
@@ -165,9 +163,11 @@ sd(tr_PERS$etpt_5.img,
 nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_5.img)) #check total N
 
 #explore etpt6
-mean(tr_PERS$etpt_6.img, na.rm = T) #mean returned NA
+mean(tr_PERS$etpt_6.img,
+     na.rm = T) #mean returned NA
 sum(is.na(tr_PERS$etpt_6.img)) #checked for number of NAs
-sd(tr_PERS$etpt_6.img, na.rm = T) #standard deviation
+sd(tr_PERS$etpt_6.img,
+   na.rm = T) #standard deviation
 nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_6.img)) #check total N
 
 #explore etpt_sprin
@@ -238,12 +238,12 @@ boxplot(tr_PERS$tmax_summe.img ~ tr_PERS$PERS106, xlab = "Presence:Absence",
 * Construct some basic plots to assess possible relationships warranting use of a GAM
 * List which variables may be amenable to a GAM--based smoother
 
+I believe all variables may be amenable to a GAM-based smoother, but I think etpt5, etpt6, etptsprin, and precwinte will definitely require smooters.
 ```{r}
-######## START SOME PRELIMINARY FIGURES
-# some scatterplot of remote sensing-based variables
-  plot(tr_PERS[20:27]) # simple data scatterplots
+
+plot(tr_PERS[1:13]) # simple data scatterplots
 # fancy scatterplot w/lines if desired from library(car)
-  scatterplotMatrix(tr_PERS[20:27],
+  scatterplotMatrix(tr_PERS[1:13],
                     main = "Scatterplots of RS data")  # scatterplot
 
 # factor plots
@@ -254,26 +254,166 @@ boxplot(tr_PERS$tmax_summe.img ~ tr_PERS$PERS106, xlab = "Presence:Absence",
   plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$etpt_5.img,
        xlab = "ETPT_5",
        ylab = "Persistence", 
-    col = col.list) # plot 1: tm4
+    col = col.list)
   
-  plot(as.factor(dat1$lp) ~ dat1$precip,
-       xlab = "precipitation", 
-    ylab = "Lodgeple category",
-    col = col.list) # plot 2: precipitation
+  plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$etpt_6.img,
+       xlab = "ETPT_6", 
+    ylab = "Persistence",
+    col = col.list)
   
-  plot(as.factor(dat1$lp) ~ dat1$elev,
-       xlab = "Elevation",
-       ylab = "Lodgeple category", 
-    col = col.list) # plot 3: elevation
-  par(mfrow = c(1, 1))
+  plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$etpt_sprin.img,
+       xlab = "ETPT_Sprin",
+       ylab = "Persistence", 
+    col = col.list)
+  
+   plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$prec_winte.img,
+       xlab = "Prec Winte",
+       ylab = "Persistence", 
+    col = col.list)
+  
+    plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$tave_s_hal.img,
+       xlab = "Tave S Hal",
+       ylab = "Persistence", 
+    col = col.list)
+  
+    plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$tave_sprin.img,
+       xlab = "Tave Sprin",
+       ylab = "Persistence", 
+    col = col.list)
+    
+    plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$tmax_s_hal.img,
+       xlab = "Tmax S Hal",
+       ylab = "Persistence", 
+    col = col.list)
+    
+    plot(as.factor(tr_PERS$PERS106) ~ tr_PERS$tmax_summe.img,
+       xlab = "Tmax Summe",
+       ylab = "Persistence", 
+    col = col.list)
+  
+
 
 ```
+
+
+
 ---
 
 ## Question #3
 
 * Construct a set of GAMs from fully linear to a maximum of 5 splines
   * Use lowess smoother rather than default spline
+```{r}
+################################################################################
+######## START COMPARATIVE GAM MODELLING
+
+# GAM model 0: all linear
+#   can use glm for linear model 
+  mod0.GLM <- glm(PERS106 ~ etpt_5.img +
+                    etpt_6.img +
+                    etpt_sprin.img +
+                    mind_yr_av.img +
+                    prec_winte.img +
+                    tave_s_hal.img +
+                    tave_sprin.img +
+                    tmax_s_hal.img +
+                    tmax_summe.img, 
+    family = binomial,
+    data = tr_PERS)
+
+# alternative linear model using gam call
+  mod0.GAM <- gam(PERS106 ~ etpt_5.img +
+                    etpt_6.img +
+                    etpt_sprin.img +
+                    mind_yr_av.img +
+                    prec_winte.img +
+                    tave_s_hal.img +
+                    tave_sprin.img +
+                    tmax_s_hal.img +
+                    tmax_summe.img, 
+    family = binomial,
+    data = tr_PERS,
+    )
+  summary(mod0.GAM) # model #0 summary
+
+# GAM model 1: all smoothers using defaults df (smoothers=4)
+  mod1.GAM <- gam(PERS106 ~ s(etpt_5.img) +
+                    s(etpt_6.img) +
+                    s(etpt_sprin.img) +
+                    s(mind_yr_av.img) +
+                    s(prec_winte.img) +
+                    s(tave_s_hal.img) +
+                    s(tave_sprin.img) +
+                    s(tmax_s_hal.img) +
+                    s(tmax_summe.img), 
+    family = binomial,
+    data = tr_PERS)
+  summary(mod1.GAM) # model #1 summary
+
+# GAM model 2: all smoothers using specified df (smoothers=5)
+  mod2.GAM <- gam(PERS106 ~ s(etpt_5.img, 5) +
+                    s(etpt_6.img, 5) +
+                    s(etpt_sprin.img, 5) +
+                    s(mind_yr_av.img, 5) +
+                    s(prec_winte.img, 5) +
+                    s(tave_s_hal.img, 5) +
+                    s(tave_sprin.img, 5) +
+                    s(tmax_s_hal.img, 5) +
+                    s(tmax_summe.img, 5), 
+                  family = binomial, 
+                  data = tr_PERS)
+  summary(mod2.GAM) # model #2 summary 
+
+# GAM model 3: stepwise w/diff scopes
+  mod3.GAM <- step.Gam(mod2.GAM,
+                       scope = list("etpt_5.img" = ~1 + 
+                                    etpt_5.img + 
+                                    s(etpt_5.img, 3) + 
+                                    s(etpt_5.img, 5),
+                                  "etpt_6.img" = ~1 + 
+                                    etpt_6.img + 
+                                    s(etpt_6.img, 3) + 
+                                    s(etpt_6.img, 5),
+                                  "etpt_sprin.img" = ~1 + 
+                                    etpt_sprin.img + 
+                                    s(etpt_sprin.img, 3) + 
+                                    s(etpt_sprin.img, 5),
+                                  "mind_yr_av.img" = ~1 + 
+                                    mind_yr_av.img + 
+                                    s(mind_yr_av.img, 3) + 
+                                    s(mind_yr_av.img, 5),
+                                  "prec_winte.img" = ~ 1 + 
+                                    prec_winte.img + 
+                                    s(prec_winte.img, 3) + 
+                                    s(prec_winte.img, 5),
+                                  "tave_s_hal.img" = ~1 + 
+                                    tave_s_hal.img + 
+                                    s(tave_s_hal.img, 3) + 
+                                    s(tave_s_hal.img, 5),
+                                  "tave_sprin.img" = ~1 + 
+                                    tave_sprin.img + 
+                                    s(tave_sprin.img, 3) + 
+                                    s(tave_sprin.img, 5),
+                                  "tmax_s_hal.img" = ~1 + 
+                                    tmax_s_hal.img + 
+                                    s(tmax_s_hal.img, 3) + 
+                                    s(tmax_s_hal.img, 5),
+                                  "tmax_summe.img" = ~1 + 
+                                    tmax_summe.img + 
+                                    s(tmax_summe.img, 3) + 
+                                    s(tmax_summe.img, 5)), 
+                                  trace = F)
+  summary(mod3.GAM) # model #3 summary
+  
+  
+  names(mod3.GAM$coefficients) # find the linear terms
+  #summary.glm(mod3.GAM)$coefficients[c(1:2, 4:6, 10:11), ] # access linear terms
+######## END MODEL COMPARATIVE GAM MODELLING
+################################################################################
+
+
+
+```
 
 ---
 
@@ -282,6 +422,78 @@ boxplot(tr_PERS$tmax_summe.img ~ tr_PERS$PERS106, xlab = "Presence:Absence",
 * Calculate accuracy metrics (as in Module 3.2 and 3.3, Analytical Intermission) using:
   * Resubstitution approaches, and
   * A 10-fold cross--validation approach
+```{r}
+######## START MODEL COMPARISONS
+# estimate model fits
+  mod0.glm <- 100 * (1 - mod0.GLM$deviance/mod0.GLM$null.deviance) # model fit
+  mod0.fit <- 100 * (1 - mod0.GAM$deviance/mod0.GAM$null.deviance) # model fit
+  mod1.fit <- 100 * (1 - mod1.GAM$deviance/mod1.GAM$null.deviance) # model fit
+  mod2.fit <- 100 * (1 - mod2.GAM$deviance/mod2.GAM$null.deviance) # model fit
+  mod3.fit <- 100 * (1 - mod3.GAM$deviance/mod3.GAM$null.deviance) # model fit
+  mods.fit <- cbind(mod0.glm, mod0.fit, mod1.fit, mod2.fit, mod3.fit) # all model fits
+  mods.fit # examine 
+
+# measures of resubstitution accuracy
+  library(PresenceAbsence) # load pkg for accuracy
+  mod.list <- c("mod0.GAM",
+                "mod1.GAM",
+                "mod2.GAM",
+                "mod3.GAM")
+  for (i in 1:length(mod.list)) {
+    pred <- predict(get(mod.list[i]),
+                    type = "response") # predict by model
+    mod.num <- mod.list[i] # assign model No. to varname
+    dat <- cbind(mod.num,
+                 tr_PERS[2],
+                 pred) # build obs and prediction dataframe
+    cut <- optimal.thresholds(dat,
+                              opt.methods = c("PredPrev=Obs")) # threshold=prevalence
+    cfmat <- table(dat[[2]],
+                   factor(as.numeric(dat$pred >= cut$pred))) # confusion matrix
+    acc <- presence.absence.accuracy(dat,
+                                     threshold = cut$pred,
+                                     st.dev = F) # calc accuracies
+    tss <- acc$sensitivity + acc$specificity - 1 # code TSS metric
+    acc <- cbind(acc[1:7], tss) # bind all metrics
+    acc$model <- mod.num # variable substitution
+    if (i == 1) mods.acc <- acc else mods.acc <- rbind(mods.acc, acc) # build output dataframe
+    }
+  mods.acc[c(1, 4:5, 7:8)] # resubstittution accuracies by model 
+
+
+# measures of 5-fold cross-validation accuracy
+#   absent set.seed() answers will differ among runs
+  library(DAAG) # load pkg for crossval
+  set.seed(1234) # set seed for replicability
+  mod.list <- c("mod0.GAM",
+                "mod1.GAM",
+                "mod2.GAM",
+                "mod3.GAM")
+  for (i in 1:length(mod.list)) {
+    cv.mod <- CVbinary(get(mod.list[i]),
+                       nfolds = 10,
+                       print.details = F) # crossval predict
+    cv.pers <- cv.mod$cvhat # assign new name to jackknife estimates
+    mod.num <- mod.list[i] # assign model No. to varname
+    cv.dat <- cbind(mod.num,
+                    tr_PERS[2],
+                    cv.pers) # build obs and prediction dataframe
+    cv.cut <- optimal.thresholds(cv.dat,
+                                 opt.methods = c("ObsPrev")) # threshold=pers
+    cv.cfmat <- table(cv.dat[[2]],
+                      factor(as.numeric(cv.dat$cv.pers > cv.cut$cv.pers))) # confusion matrix
+    cv.acc <- presence.absence.accuracy(cv.dat,
+                                        threshold = cv.cut$cv.pers,
+                                        st.dev = F) # calculate accuracies
+    cv.tss <- cv.acc$sensitivity + cv.acc$specificity - 1 # code TSS metric
+    cv.acc <- cbind(cv.acc[1:7],
+                    cv.tss) # bind all metrics
+    cv.acc$model <- mod.num # variable substitution
+    if (i == 1) mods.cvacc <- cv.acc else mods.cvacc <- rbind(mods.cvacc, cv.acc) # build output dataframe
+    }
+  mods.cvacc[c(1, 4:5, 7:8)]  # accuracies by model 
+######## END MODEL COMPARISONS
+```
 
 ---
 
@@ -290,6 +502,67 @@ boxplot(tr_PERS$tmax_summe.img ~ tr_PERS$PERS106, xlab = "Presence:Absence",
 * Build 2 prediction maps:
   * A raw probability estimate for each cell in the modelling domain; and
   * A classified map based on the selected threshold from Question #4
+
+```{r}
+setwd(path.preds)
+pers.list <- list.files(pattern = ".img$") # list of .img files; $ strips extra
+pers.list # examine
+pers.dom <- stack(pers.list) # build raster stack
+pers.dom # examine stack
+names(pers.dom) # examine stack names
+names(pers.dom) <- paste(names(pers.dom),'img')
+
+setwd(path.gis)
+states <- st_read(dsn = ".",
+                  layer = "na_states_wgs") # import shapefile
+
+
+
+#create a probability model
+pers.prob <- predict(pers.dom,
+                     mod1.GAM, 
+                     type = "response",
+                     fun = predict,
+                     index = 2,
+                     overwrite = T) # prediction raster
+pers.prob # examine
+
+
+
+# next reclassify based on threshold mod.cut per above
+pers.class <- reclassify(pers.prob,
+                         c(0,cut[[2]],0,
+                           cut[[2]],1,1),
+                         overwrite=TRUE)
+pers.class
+
+#restrict class and prob models to domain
+setwd(path.ex)
+load('pers.PPsA.RData')
+pers.bufR <-raster(pers.bufR)
+new.pers.bufR <- projectRaster(pers.bufR,
+                               pers.class)
+pers.class <- pers.class*new.pers.bufR
+pers.prob <- pers.prob*new.pers.bufR
+#Plot probability map#
+par(mfrow = c(1,1))
+plot(pers.prob,
+     axes = T,
+     main = 'Probability Map')
+plot(st_geometry(states),
+     add = T,
+     lwd = 1.5)
+
+#Classification Map#
+plot(pers.class, legend = F,
+     axes = T,
+     main = "Classification Map") # plot classification map
+plot(st_geometry(states),
+     add = T,
+     lwd = 1.5) # add state boundaries 
+
+
+```
 
 ---
 
@@ -302,7 +575,20 @@ boxplot(tr_PERS$tmax_summe.img ~ tr_PERS$PERS106, xlab = "Presence:Absence",
 * Save these R objects in a **`.RData`** file
 
 These data will be used again in Module 10, Ensemble Models.
+```{r}
+setwd('C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8')
+save.image(pers.class,
+           pers.prob,
+           file = 'C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8')
+save(cut,
+     mods.acc,
+     pers.class,
+     pers.prob, 
+     file = 'ex8.RData')
+save.image()
+```
 
+```
 ---
 
 ## The End
