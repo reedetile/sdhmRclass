@@ -576,10 +576,10 @@ plot(st_geometry(states),
 
 These data will be used again in Module 10, Ensemble Models.
 ```{r}
-setwd('C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8')
+setwd('path.ex')
 save.image(pers.class,
            pers.prob,
-           file = 'C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8')
+           file = 'ex8')
 save(cut,
      mods.acc,
      pers.class,

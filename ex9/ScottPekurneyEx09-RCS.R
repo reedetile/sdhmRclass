@@ -212,6 +212,8 @@ mod1.accXF
 # * Build 2 prediction maps:
 #         * A raw probability estimate for each cell in the modelling domain; and
 # * A classified map based on the selected threshold from Question #4
+#setwd(path.ex)
+#load('ex9.RData')
 
 setwd(path.gis)
 states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
