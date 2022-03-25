@@ -229,13 +229,20 @@ pers.class.MAX <- reclassify(pers.prob.MAX, c(0,mod.cut[[2]],0,
 pers.class.MAX
 
 #restrict class and prob models to domain
+
 setwd(path.ex)
-load('pers.PPsA.RData')
-pres.bufpt <-raster(pers.bufR)
-plot(pers.bufR)
-new.pers.bufR <- projectRaster(pers.bufR, pers.class.MAX)
-pers.class.MAX <- pers.class.MAX*new.pers.bufR
-pers.prob.MAX <- pers.prob.MAX*new.pers.bufR
+load('ex9.RData')
+load("pers.bufptR")
+# # crop(x = pers.topoDOM, y = )
+#load('pers.PPsA.RData',verbose = TRUE)
+# plot(pers.topoDOM)
+# pers.bufR <-raster(pers.bufR)
+# plot(pers.bufR)
+
+new.pers.bufptR <- raster::projectRaster(pers.bufptR, pers.class.MAX)
+
+pers.class.MAX <- pers.class.MAX*new.pers.bufptR
+pers.prob.MAX <- pers.prob.MAX*new.pers.bufptR
 
 par(mfrow=c(1,1))
 #Plot probability map#
