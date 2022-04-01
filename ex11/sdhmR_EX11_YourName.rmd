@@ -1,0 +1,296 @@
+---
+title: "Exercise 11"
+author: "Group J"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
+
+<!-- These are global options  
+       set root directory here 
+       NOTE mine is active; yours is commented out
+       change the path to reflect your CPU,
+       then comment out or delete mine
+--> 
+```{r global_options, include=FALSE}
+knitr::opts_knit$set(root.dir = "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1") #Reed Path
+#knitr::opts_knit$set(root.dir ="C:/Users/14842/Documents/SDHM/sdhmR-V2022.1") #Lindsey Path
+#knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
+knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
+```
+
+---
+
+## This exercise links to Module 5.5
+
+Submit the completed exercise to us at:
+
+* t.edwards@usu.edu 
+* eric_tsakiris@fws.gov  
+
+---
+
+## Context
+
+The data are of the *Pinus edulis* Common piñon, the species you dealt with in Exercise #3 -- #5.  This exercise relies on the dataframe you generated in exercise #6.  Hopefully you saved those combined presence:absence dataframe, with the reduced variables you begin SDHM model construction with, or regrettably you will need to return to exercise #6 and re--build that dataframe.
+
+The goal is to:
+* Produce and interpret variable importance plots
+* Build a table of accuracy metrics, and AUC plot
+* Plot map products of the:
+  * (i) probability; and 
+  * (ii) classified distribution model
+  * (Save these two maps as **`.img`** files for use later in the course)
+
+
+Remember, you will have been assigned data for *edulis* having one the following four discrete labels:
+
+* **Seedlings**:  these data indicate spatial locations where seedlings of the tree have been found
+* **Mortality**: these data indicate spatial locations where mortality has been observed
+* **Persistence**: these data have no observed mortality or seedling at given spatial locations
+* **Range**: the total dataset, including all spatial locations of seedlings, mortality, and persistence
+
+---
+
+## The Data
+
+* The dataframe completed in exercise #6.
+
+---
+
+## Question #1
+
+* Import and explore data
+  * **NOTE**:  intent is not to reduce number of variables; that was completed in exercise #5.  Rather, calculate simple descriptive statistics (mean, sd, n) and boxplots
+
+
+```{r Creat paths + load libs}
+#Initialize -----------------------------------------
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
+path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
+path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
+path.gis <- paste(path.root, "/data/gis_layers", sep = "") #path to gis files
+
+# some libraries
+library(raster)	# FXNS: extent, raster, res, rasterize, values, writeRaster, 
+#       cellFromXY, extract
+library(sf)    	# FXNS: st_as_sf, st_as_sfc, st_bbox, st_convex_hull, st_union
+#       st_buffer, st_read, st_write, st_intersection, st_geometry,
+#       st_drop_geometry, st_coordinates, st_sf
+library(terra)	# FXNS: as.data.frame, rast, vect
+library(sp)
+library(dplyr)
+library(tidyverse)
+library(data.table)
+library(modeest)
+library(DAAG)
+library(PresenceAbsence)
+options("rgdal_show_exportToProj4_warnings"="none") # run this before library(rgdal)
+library(rgdal)
+library(dismo)
+library(maptools)
+library(randomForest)
+
+# source course CRSs
+setwd(path.root)
+getwd()
+source("r_code/prjs4_sdhmR.r")
+ls(pattern = "prj.") # should be 5 prj.* objects
+```
+
+
+```{r import data}
+# Global Variables-------------------------------------
+setwd(path.ex)
+load('tr_PERS.RData')
+class(tr_PERS)
+head(tr_PERS)
+drops <- c('wgs_xF','wgs_yF','cell.wgs_x','cell.wgs_y','exp5nrm','exp3nrm','rough_1k','prad_sw_di',
+           'etpt_5','mind_yr_av','prec_winte','tave_sprin','UNIQUEID.x'
+           ,'UNIQUEID.y')
+tr_PERS <- tr_PERS[ ,!(names(tr_PERS) %in% drops)]
+tr_PERS <- na.omit(tr_PERS)
+dim(tr_PERS)
+```
+
+```{r explore data}
+# Program Body------------------------------------------
+
+###Question 1: explore data:###
+#explore etpt5
+mean(tr_PERS$etpt_5.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$etpt_5.img)) #checked for number of NAs
+sd(tr_PERS$etpt_5.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_5.img)) #check total N
+
+#explore etpt6
+mean(tr_PERS$etpt_6.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$etpt_6.img)) #checked for number of NAs
+sd(tr_PERS$etpt_6.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_6.img)) #check total N
+#explore etpt_sprin
+mean(tr_PERS$etpt_sprin.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$etpt_sprin.img)) #checked for number of NAs
+sd(tr_PERS$etpt_sprin.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$etpt_sprin.img)) #check total N
+#explore mind_yr_ave
+mean(tr_PERS$mind_yr_av.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$mind_yr_av.img)) #checked for number of NAs
+sd(tr_PERS$mind_yr_av.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$mind_yr_av.img)) #check total N
+#explore prec_winte
+mean(tr_PERS$prec_winte.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$prec_winte.img)) #checked for number of NAs
+sd(tr_PERS$prec_winte.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$prec_winte.img)) #check total N
+#explore tave_s_hal
+mean(tr_PERS$tave_s_hal.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$tave_s_hal.img)) #checked for number of NAs
+sd(tr_PERS$tave_s_hal.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$tave_s_hal.img)) #check total N
+#explore tave_sprin
+mean(tr_PERS$tave_sprin.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$tave_sprin.img)) #checked for number of NAs
+sd(tr_PERS$tave_sprin.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$tave_sprin.img)) #check total N
+#explore tmax_summe
+mean(tr_PERS$tmax_summe.img, na.rm = T) #mean returned NA
+sum(is.na(tr_PERS$tmax_summe.img)) #checked for number of NAs
+sd(tr_PERS$tmax_summe.img, na.rm = T) #standard deviation
+nrow(tr_PERS) - sum(is.na(tr_PERS$tmax_summe.img)) #check total N
+
+
+#Boxplots
+par(mfrow = c(3, 3))
+boxplot(tr_PERS$etpt_5.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "etpt5", na.rm = T)
+boxplot(tr_PERS$etpt_6.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "etpt6", na.rm = T)
+boxplot(tr_PERS$etpt_sprin.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "etpt_sprin", na.rm = T)
+boxplot(tr_PERS$mind_yr_av.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "mind_yr_ave", na.rm = T)
+boxplot(tr_PERS$prec_winte.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "prec_winte", na.rm = T)
+boxplot(tr_PERS$tave_s_hal.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "tave_s_hal", na.rm = T)
+boxplot(tr_PERS$tave_sprin.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "tave_sprin", na.rm = T)
+boxplot(tr_PERS$tmax_s_hal.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "tmax_s_hal", na.rm = T)
+boxplot(tr_PERS$tmax_summe.img ~ tr_PERS$PERS106, xlab = "Presence:Absence", 
+        ylab = "tmax_summe", na.rm = T)
+par(mfrow=c(1,1))
+```
+
+**YET ANOTHER NOTE RELATED TO CODE:**  
+If King's English interpretation is required, it will go here, after each code chunk.
+
+---
+
+## Question #2
+
+* Construct a boosted regression tree (BRT) model using the presence:absence data
+* Build plots of variable importance values
+
+```{r Create model}
+resp <- paste("as.factor(", colnames(tr_PERS[2]), ")", sep = "") # assign resp to col number
+n.col <- ncol(tr_PERS) # number of columns
+pred <- 5:n.col # assign predictors to column numbers 
+
+################################################################################
+######## START BRT MODELS
+date() # start time stamp
+pers.BRT <- gbm.step(data = tr_PERS, gbm.x = pred, gbm.y = 2, family = "bernoulli",
+                     tree.complexity = 3, learning.rate = 1e-04, bag.fraction = 0.75, n.folds = 10, 
+                     n.trees = 50, plot.main = TRUE, keep.fold.fit = TRUE) 
+date()
+
+#run again#
+pers.BRT2 <- gbm.step(data = tr_PERS, gbm.x = pred, gbm.y = 2, family = "bernoulli",
+                     tree.complexity = 3, learning.rate = 0.01, bag.fraction = 0.75, n.folds = 10, 
+                     n.trees = 50, plot.main = TRUE, keep.fold.fit = TRUE) 
+date()
+```
+---
+
+## Question #3
+
+* Calculate accuracy metrics (as in Module 3.2 and 3.3, Analytical Intermission) using:
+  * Resubstitution approaches, and
+  * A 10-fold cross--validation approach
+
+---
+
+## Question #4
+
+* Build 2 prediction maps:
+  * A raw probability estimate for each cell in the modelling domain; and
+  * A classified map based on the selected threshold from Question #3
+setwd(path.gis)
+states <- st_read(dsn = ".", layer = "na_states_wgs") # import shapefile
+```{r Create Models}
+#create a probability model
+setwd(path.preds)
+load('pers.topoDOM.RData')
+pers.dom <- pers.topoDOM
+pers.prob.BRT <- predict(pers.dom, pers.BRT2, 
+                        type = "response", n.trees = pers.BRT2$gbm.call$best.trees) # prediction raster
+pers.prob.BRT # examine 
+
+# next reclassify based on threshold mod.cut per above
+pers.class.BRT <- reclassify(pers.prob.BRT, c(0,mod.cut[[2]],0, 
+                                            mod.cut[[2]],1,1),overwrite=TRUE)
+pers.class.BRT
+```
+
+```{r Restrict to domain}
+#restrict to domain#
+setwd(path.ex)
+load("pers.bufptR.img")
+# # crop(x = pers.topoDOM, y = )
+#load('pers.PPsA.RData',verbose = TRUE)
+# plot(pers.topoDOM)
+# pers.bufR <-raster(pers.bufR)
+# plot(pers.bufR)
+
+new.pers.bufptR <- raster::projectRaster(pers.bufptR, pers.class.BRT)
+
+pers.class.BRT <- pers.class.BRT*new.pers.bufptR
+pers.prob.BRT <- pers.prob.BRT*new.pers.bufptR
+```
+
+```{r Plot maps}
+par(mfrow=c(1,1))
+#Plot probability map#
+plot(pers.prob.BRT, axes = T, main = 'Probability Map')
+plot(st_geometry(states), add = T)
+
+#Classification Map#
+plot(pers.class.BRT, legend = F, axes = T, main = "Classification Map") # plot classification map
+plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
+```
+---
+
+## Question #5
+
+* Save your data as R objects:
+  * Accuracy metrics as a dataframe;
+  * Classification threshold as a stand--alone scalar
+  * Both prediction maps as **`.img`** format
+* Save these R objects in a **`.RData`** file
+
+These data will be used again in Module 10, Ensemble Models.
+```{r Save}
+setwd(path.ex)
+save(pers.BRT,pers.BRT2, file = 'ex11.RData')
+save(pers.class.BRT, file = 'persClassBRT.img')
+save(pers.prob.BRT, file = 'persProbBRT.img')
+```
+
+---
+
+## The End
+
+---
