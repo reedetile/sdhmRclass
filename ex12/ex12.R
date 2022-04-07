@@ -35,27 +35,12 @@ path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
  load('ex9.RData')
  load('ex10.RData')
  load('ex11.RData')
-  mod.list <- c("ex7.RData",
-                "ex8.RData",
-                "ex9.RData",
-                "ex10.RData",
-                "ex11.RData"
+  mod.list <- c("mod1.MAX",
+                "pers.BRT",
+                "pers.BRT2",
+                "pers.RF"
                 ) # build list of SDHM models
   mod.list # examine
-
-# loop for loading models and assigning consistent names
-  for (i in 1:length(mod.list)) {
-    m1 <- unlist(strsplit(mod.list[i],
-                          ".RData")) # char manipulation
-    m2 <- substr(m1,
-                 5,
-                 nchar(m1)) # char manipulation
-    assign(paste("modF.",
-                 m2,
-                 sep = ""),
-           get(load(mod.list[i])))
-  }
-  ls(pattern = "modF.") # new r objects for use in prediction 
 
 # list of thresholds for classification; assume have been saved
   load("modF.cut.RData") # load threshold cuts as modF.cut object
