@@ -31,14 +31,23 @@ path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 # load SDM models; assumes have saved models w/consistent file naming process
   setwd(paste(path.mod, sep = ""))
  load('ex7.RData')
+ GLM.cut <- mod.cut
+ GLM <- mod1.acc
  load('ex8.RData')
+GAM.cut <- cut
+GAM <- mods.acc
  load('ex9.RData')
+ MAX <- mod1.MAX
+MAX.cut <- mod.cut
  load('ex10.RData')
+ RF <- pers.RF
  load('ex11.RData')
-  mod.list <- c("mod1.MAX",
-                "pers.BRT",
-                "pers.BRT2",
-                "pers.RF"
+ BRT <- pers.BRT
+  mod.list <- c("GLM",
+                "GAM",
+                "MAX",
+                "RF",
+                "BRT"
                 ) # build list of SDHM models
   mod.list # examine
 
@@ -46,6 +55,9 @@ path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
   load("modF.cut.RData") # load threshold cuts as modF.cut object
   modF.cut # examine
 
+  
+  
+  
 ## Question #2
 # Calculate the frequencies of "presence" in each of the 5 SDHMs
 
