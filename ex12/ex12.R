@@ -50,6 +50,12 @@ MAX.cut <- mod.cut
                 "BRT"
                 ) # build list of SDHM models
   mod.list # examine
+  
+  cut.list <- c("GLM.cut",
+                "GAM.cut",
+                "MAX.cut"
+  )
+  cut.list # threshold cuts?
 
 # list of thresholds for classification; assume have been saved
   load("modF.cut.RData") # load threshold cuts as modF.cut object
