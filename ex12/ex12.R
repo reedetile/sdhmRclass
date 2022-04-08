@@ -13,6 +13,7 @@ path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 # below is the recommended class root dir
   #path.root <- "~/sdhmR-V2020.1"  # typical class root dir
 path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
+path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
   #path.figs <- paste(path.root, "/powerpoints/figures", sep = "")
   #path.gis <- paste(path.root, "/data/gis_layers", sep = "")
 
@@ -28,40 +29,37 @@ path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 
 ################################################################################
 ######## START INITIALIZATION OF DATA STRUCTURES
-# load SDM models; assumes have saved models w/consistent file naming process
-  setwd(paste(path.mod, sep = ""))
- load('ex7.RData')
- GLM.cut <- mod.cut
- GLM <- mod1.acc
- load('ex8.RData')
-GAM.cut <- cut
-GAM <- mods.acc
- load('ex9.RData')
- MAX <- mod1.MAX
-MAX.cut <- mod.cut
- load('ex10.RData')
- RF <- pers.RF
- load('ex11.RData')
- BRT <- pers.BRT
-  mod.list <- c("GLM",
-                "GAM",
-                "MAX",
-                "RF",
-                "BRT"
-                ) # build list of SDHM models
-  mod.list # examine
+ 
+# load SDM models. I renamed the models and the threshold cuts to make it more clear which is which. I'm still mostly confused...
+ 
+setwd(paste(path.mod, sep = ""))
+load('ex7.RData')
+  GLM.cut <- mod.cut
+load('ex8.RData')
+  GAM.cut <- cut
+load('ex9.RData')
+  MAX <- mod1.MAX
+  MAX.cut <- mod.cut
+load('ex10.RData')
+  RF <- pers.RF
+load('ex11.RData')
+  BRT <- pers.BRT
   
+
+### Building a list of cut points. Missing the RF and BRT threshold cuts. Also, the values don't seem to be associated with these cuts.
   cut.list <- c("GLM.cut",
                 "GAM.cut",
                 "MAX.cut"
   )
   cut.list # threshold cuts?
 
-# list of thresholds for classification; assume have been saved
-  load("modF.cut.RData") # load threshold cuts as modF.cut object
-  modF.cut # examine
 
-  
+  setwd(path.preds)
+  pers.list <- list.files(pattern = ".img$") # list of .img files; $ strips extra
+  pers.list # examine
+  pers.dom <- stack(pers.list) # build raster stack
+  pers.dom # examine stack
+  names(pers.dom) 
   
   
 ## Question #2
