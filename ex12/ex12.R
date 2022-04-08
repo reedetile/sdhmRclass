@@ -8,14 +8,10 @@
 
 #path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
 path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
-# some pathnames; yours will be specific to your CPU !!
 
-# below is the recommended class root dir
-  #path.root <- "~/sdhmR-V2020.1"  # typical class root dir
 path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
-  #path.figs <- paste(path.root, "/powerpoints/figures", sep = "")
-  #path.gis <- paste(path.root, "/data/gis_layers", sep = "")
+
 
 # load libraries
   library(raster)
@@ -30,7 +26,7 @@ path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 ################################################################################
 ######## START INITIALIZATION OF DATA STRUCTURES
  
-# load SDM models. I renamed the models and the threshold cuts to make it more clear which is which. I'm still mostly confused...
+# load SDM models. I renamed the models and the threshold cuts to make it more clear which is which.
  
 setwd(paste(path.mod, sep = ""))
 load('ex7.RData')
@@ -53,7 +49,7 @@ load('ex11.RData')
   )
   cut.list # threshold cuts?
 
-
+# raster stack of predictors assumes rasters all have same projection, extent & resolution
   setwd(path.preds)
   pers.list <- list.files(pattern = ".img$") # list of .img files; $ strips extra
   pers.list # examine
@@ -61,15 +57,59 @@ load('ex11.RData')
   pers.dom # examine stack
   names(pers.dom) 
   
+# LR prediction and classification
+  setwd(paste(path.mod06,
+              "/maps",
+              sep = ""))
+  modFprob.LR <- predict(pers.dom,
+                         mod.GLM,
+                         filename = "modFprob.GLM.img", 
+                         type = "response",
+                         fun = predict,
+                         index = 2,
+                         overwrite = T)
+  modFclas.LR <- reclassify(mod.GLM,
+                            filename = "modFclas.GLM.img", 
+                            (c(0,
+                               modF.cut$GLM.cut,
+                               0,
+                               modF.cut$GLM.cut,
+                               1,
+                               1)),
+                            overwrite = T)
   
+# giggle plots
+  par(mfrow = c(1, 2))
+  plot(modFprob.LR,
+       axes = T,
+       main = "LR probability map") # plot probability map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T)  # make pretty
+  plot(modFclas.LR,
+       axes = T,
+       main = "LR classfied map") # plot classified map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty 
+  par(mfrow = c(1, 1))
+  
+  
+  
+  
+  
+  
+ ########################################################################### 
 ## Question #2
 # Calculate the frequencies of "presence" in each of the 5 SDHMs
 
-
+#############################################################################
 ## Question #3
 #Tally the frequencies of concordance after "clipping" and compare with above
 
-
+#############################################################################
 ## Question #4
 
 #* Save your data as R objects:
