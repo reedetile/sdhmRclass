@@ -97,6 +97,42 @@ load('ex11.RData')
   par(mfrow = c(1, 1))
   
   
+# GAM prediction and classification
+  library(gam)
+  modFprob.GAM <- predict(pred.dom,
+                          mod.GAM,
+                          filename = "modFprob.GAM.img", 
+                          type = "response",
+                          fun = predict,
+                          index = 2,
+                          overwrite = T)
+  modFclas.GAM <- reclassify(modFprob.GAM,
+                             filename = "modFclas.GAM.img", 
+                             (c(0,
+                                modF.cut$GAM.cut,
+                                0,
+                                modF.cut$GAM.cut,
+                                1,
+                                1)),
+                             overwrite = T) 
+  
+  # giggle plots
+  par(mfrow = c(1, 2))
+  plot(modFprob.GAM,
+       axes = T,
+       main = "GAM probability map") # plot probability map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty
+  plot(modFclas.GAM,
+       axes = T,
+       main = "GAM classfied map") # plot classified map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty 
+  par(mfrow = c(1, 1)) 
   
   
   
