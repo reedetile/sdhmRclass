@@ -257,11 +257,130 @@ modFprob.BRT <- predict(pers.dom,
   par(mfrow = c(1, 1))
   
   # save MAX plots if desired 
-  #setwd(path.figs)
-  #savePlot(filename = "mod06fig05.pdf", type = "pdf")
+  setwd(path.figs)
+  savePlot(filename = "mod06fig05.pdf", type = "pdf")
   ####
   ######## END PREDICTION PROBABILITY AND CLASSIFED MAPS
   ################################################################################
+  
+  ################################################################################
+  ######## START ENSEMBLE PROCESS
+  # load probability & classified maps; create stacks
+  setwd(paste(path.maps, sep = ""))
+  pr.list <- unlist(unique(strsplit(list.files(pattern = "Fprob"),
+                                    ".aux.xml")))
+  pr.list # examine
+  prob.dom <- stack(pr.list) # raster stack prob maps
+  prob.dom # examine
+  
+  # cl.list <- list.files(pattern = "Fclas")
+  cl.list <- unlist(unique(strsplit(list.files(pattern = "Fclas"),
+                                    ".aux.xml")))
+  cl.list # examine
+  clas.dom <- stack(cl.list) # raster stack classified maps
+  clas.dom # examine
+  
+  # standardize all prediction maps 0-1.0
+  maxValue(prob.dom) # extract max value for each prob map
+  layers <- {} # initialize (empty) list of raster layers
+  for (i in 1:length(names(prob.dom))) {
+    m1 <- prob.dom[[i]] # get a prob map
+    m2 <- 1/maxValue(prob.dom[[i]]) * prob.dom[[i]] # standardize all probs to max=1
+    m3 <- unlist(strsplit(names(prob.dom[[i]]), "[.]")) # split prob layer name apart
+    names(m2) <- paste(m3[1], "STD.", m3[2], sep = "")  # assign name to raster value
+    assign(paste(m3[1], "STD.", m3[2], sep = ""), m2) # assign new name to standardized layer
+    layers <- c(layers, get(paste(m3[1], "STD.", m3[2], sep = "")))
+  }
+  probSTD.dom <- stack(layers)
+  maxValue(probSTD.dom) # extract max value for each prob map; standardized ?
+  
+  # save stacks
+  setwd(path.mod)
+  save(prob.dom,
+       probSTD.dom,
+       clas.dom,
+       file = "ensemble.dom.RData")
+  
+  ######################################################
+  # descriptive stats on raster maps: mean & sum
+  prob.mean <- mean(prob.dom) # mean prob map
+  # access min max values of descriptive stat raster
+  maxValue(prob.mean) # max pr.mean
+  minValue(prob.mean) # min pr.mean
+  probSTD.mean <- mean(probSTD.dom) # mean standardized prob map
+  clas.sum <- sum(clas.dom) # sum of models by cell
+  
+  # giggle plots: mean & sum
+  par(mfrow = c(1, 2))
+  plot(prob.mean,
+       axes = T,
+       main = "MEAN probability map") # plot probability map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty
+  plot(clas.sum,
+       axes = T,
+       main = "Concordance CLASS map: Ramp") # plot concordance map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty 
+  par(mfrow = c(1, 1))
+  
+  # save plots if desired 
+  setwd(path.figs)
+  savePlot(filename = "mod06fig06.pdf", type = "pdf")
+  
+  ####
+  # arithmetic on raster maps: multiplication & subsetting
+  prob.mean1 <- (clas.sum > 0) * prob.mean  # mean where class=1
+  clas.sum1 <- clas.sum > 0 # sum where No. models >=1
+  
+  # giggle plots: means X classifications
+  par(mfrow = c(1, 2))
+  plot(prob.mean1,
+       axes = T,
+       main = "MEAN probability map: Presence=1") # plot probability map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty
+  plot(clas.sum1, axes = T,
+       main = "Concordance CLASS map: Union") # plot concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  par(mfrow = c(1, 1))
+  
+  
+  ####
+  # calculate measures of variation
+  prob.sd <- calc(prob.dom, sd) # sd prob map
+  prob.var <- calc(prob.dom, var) # var prob map
+  prob.cv <- (prob.sd/prob.mean)*100 # coefficient of variation
+  
+  # giggle plots: sd and var
+  par(mfrow = c(1, 2))
+  plot(prob.sd, axes = T, main = "SD probability map") # plot classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  plot(prob.var, axes = T, main = "VAR probability map") # plot classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  
+  # save plots if desired 
+  #setwd(path.figs)
+  #savePlot(filename = "mod06fig09.pdf", type = "pdf")
+  
+  ####
+  # some sumAUGy statistics: frequencies
+  clas.freqM <- freq(clas.dom) # [0,1] freqs by clas map; rtns list
+  clas.freqM[c(1,5)] # examine freqs for 1st 2 models
+  clas.freqS <- data.frame(freq(clas.sum)) # freqs of concordance of models
+  clas.freqS # examine; value is concordance freq
+  clas.freqS$count[6]/sum(clas.freqS$count[2:6]) # prop. models concordance=5 
+  
+  
  ########################################################################### 
 ## Question #2
 # Calculate the frequencies of "presence" in each of the 5 SDHMs
