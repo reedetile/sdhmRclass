@@ -82,7 +82,7 @@ load('ex11.RData')
                          index = 2,
                          overwrite = T)
   modFclass.LR <- reclassify(pers.prob,
-                             filename = "modFclas.LR.img",
+                             filename = "modFclass.LR.img",
                            c(0,
                              mod.cut[[2]],
                              0,
@@ -361,26 +361,171 @@ modFprob.BRT <- predict(pers.dom,
   
   # giggle plots: sd and var
   par(mfrow = c(1, 2))
-  plot(prob.sd, axes = T, main = "SD probability map") # plot classified map
+  plot(prob.sd,
+       axes = T,
+       main = "SD probability map") # plot classified map
   plot(st_geometry(pegr6.mahog), add = T)
   plot(st_geometry(pegr6.frame), add = T) # make pretty
   plot(prob.var, axes = T, main = "VAR probability map") # plot classified map
   plot(st_geometry(pegr6.mahog), add = T)
   plot(st_geometry(pegr6.frame), add = T) # make pretty 
-  
-  # save plots if desired 
-  #setwd(path.figs)
-  #savePlot(filename = "mod06fig09.pdf", type = "pdf")
+
   
   ####
-  # some sumAUGy statistics: frequencies
+  # some summary statistics: frequencies
   clas.freqM <- freq(clas.dom) # [0,1] freqs by clas map; rtns list
   clas.freqM[c(1,5)] # examine freqs for 1st 2 models
   clas.freqS <- data.frame(freq(clas.sum)) # freqs of concordance of models
   clas.freqS # examine; value is concordance freq
   clas.freqS$count[6]/sum(clas.freqS$count[2:6]) # prop. models concordance=5 
   
+
+  ######## START ENSEMBLE INTERPRETATION
+  ####
+  # 6 prob map plots
+  par(mfrow = c(2, 3))
+  plot(modFprob.LR,
+       axes= T,
+       main = "LR probability map") # LR prob map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty
   
+  plot(modFprob.GAM,
+       axes = T,
+       main = "GAM probability map") # GAM prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(modFprob.MAX,
+       axes = T,
+       main = "MAX probability map") # MAX prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(modFprob.RF,
+       axes = T,
+       main = "RF probability map") # RF prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(modFprob.BRT,
+       axes = T,
+       main = "BRT probability map") # BRT prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  
+  plot(prob.mean1,
+       axes = T,
+       main = "MEAN probability map: \nPresence=1") # MEAN prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+
+  
+  ####
+  # 6 classified maps
+  par(mfrow = c(2, 3))
+  plot(modFclass.LR,
+       axes = T,
+       main = "LR classfied map") # LR classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(modFclas.GAM, axes = T, main = "GAM classfied map") # GAM classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(modFclas.MAX, axes = T, main = "MAX classfied map") # MAX classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(modFclas.RF, axes = T, main = "RF classfied map") # RF classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(modFclas.BRT, axes = T, main = "BRT classfied map") # BRT classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  
+  plot(clas.sum, axes = T, main = "Concordance CLASS \nmap: Ramp") # plot concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  # save plots if desired 
+  #setwd(path.figs)
+  #savePlot(filename = "mod06fig11.pdf", type = "pdf")
+  
+  ####
+  # 6 classification union maps
+  clas.sumU <- clas.sum > 0 # sum where No. models =union
+  clas.sum1 <- clas.sum > 1 # sum where No. models =2+
+  clas.sum2 <- clas.sum > 2 # sum where No. models =3+
+  clas.sum3 <- clas.sum > 3 # sum where No. models =4+
+  clas.sum4 <- clas.sum > 4 # sum where No. models =5 
+  
+  # giggle plots
+  par(mfrow = c(2, 3))
+  plot(clas.sum, axes = T, main = "Concordance CLASS \nmap: Ramp")  # RAMP concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T)  # make pretty
+  
+  plot(clas.sumU, axes = T, main = "Concordance CLASS \nmap: Union")  # UNION concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T)  # make pretty
+  
+  plot(clas.sum1, axes = T, main = "Concordance CLASS \nmap: 2+")  # 2+ concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T)  # make pretty
+  
+  plot(clas.sum2, axes = T, main = "Concordance CLASS \nmap: 3+")  # 3+ concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T)  # make pretty
+  
+  plot(clas.sum3, axes = T, main = "Concordance CLASS \nmap: 4+")  # 4+ concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T)  # make pretty 
+  
+  plot(clas.sum4, axes = T, main = "Concordance CLASS \nmap: 5") # 5 concordance map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  # save plots if desired
+  #setwd(path.figs)
+  #savePlot(filename = "mod06fig12.pdf", type = "pdf")
+  
+  ####
+  # some variance analyses
+  q1 <- summary(prob.sd)[2] # 1st quartile
+  q2 <- summary(prob.sd)[3] # 2nd quartile
+  q3 <- summary(prob.sd)[4] # 3rd quartile
+  prob.sd1q <- (prob.sd >= q1) * clas.sum1 # where 2+ models agree
+  prob.sd2q <- (prob.sd >= q2) * clas.sum1 # where 2+ models agree
+  prob.sd3q <- (prob.sd >= q3) * clas.sum1 # where 2+ models agree
+  
+  # giggle plots
+  par(mfrow = c(2, 2))
+  plot(prob.sd, axes = T, main = "SD probability map") # SD prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(prob.sd1q, axes = Tmain = "1st quartile SD map") # 1stQ prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(prob.sd2q, axes = T, main = "2nd quartile SD map") # 2ndQ prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  
+  plot(prob.sd3q, axes = T, main = "3rd quartile SD map") # 3rdQ prob map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  
+  # save plots if desired
+  #setwd(path.figs)
+  #savePlot(filename = "mod06fig13.pdf", type = "pdf")
+  ######## END ENSEMBLE INTERPRETATION
+  ################################################################################
  ########################################################################### 
 ## Question #2
 # Calculate the frequencies of "presence" in each of the 5 SDHMs
