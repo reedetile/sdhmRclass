@@ -25,11 +25,11 @@ path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 ################################################################################
 ######## START INITIALIZATION OF DATA STRUCTURES
  
-# load SDM models. I renamed the models and the threshold cuts to make it more clear which is which.
+# load SDM models. I renamed the models and the threshold cuts to make it more clear
  
 setwd(paste(path.mod, sep = ""))
 load('ex7.RData')
-  LR.cut <- mod.cut$glm.cvpred
+  LR.cut <- mod.cut$glm.cvpred ### Assuming this is the cut point? In his example it's just one value
   LR <- mod2.LR
 load('ex8.RData')
   GAM.cut <- cut$pred
