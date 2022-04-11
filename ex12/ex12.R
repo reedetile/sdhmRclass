@@ -371,6 +371,17 @@ modFprob.BRT <- predict(pers.dom,
   plot(st_geometry(pegr6.frame), add = T) # make pretty 
 
   
+  # make pretty 
+  
+  # save plots if desired
+  #setwd(path.figs)
+  #savePlot(filename = "mod06fig13.pdf", type = "pdf")
+  ######## END ENSEMBLE INTERPRETATION
+  ################################################################################
+ ########################################################################### 
+## Question #2
+# Calculate the frequencies of "presence" in each of the 5 SDHMs
+
   ####
   # some summary statistics: frequencies
   clas.freqM <- freq(clas.dom) # [0,1] freqs by clas map; rtns list
@@ -379,7 +390,7 @@ modFprob.BRT <- predict(pers.dom,
   clas.freqS # examine; value is concordance freq
   clas.freqS$count[6]/sum(clas.freqS$count[2:6]) # prop. models concordance=5 
   
-
+  
   ######## START ENSEMBLE INTERPRETATION
   ####
   # 6 prob map plots
@@ -421,7 +432,7 @@ modFprob.BRT <- predict(pers.dom,
        main = "MEAN probability map: \nPresence=1") # MEAN prob map
   plot(st_geometry(pegr6.mahog), add = T)
   plot(st_geometry(pegr6.frame), add = T) # make pretty 
-
+  
   
   ####
   # 6 classified maps
@@ -519,17 +530,12 @@ modFprob.BRT <- predict(pers.dom,
   
   plot(prob.sd3q, axes = T, main = "3rd quartile SD map") # 3rdQ prob map
   plot(st_geometry(pegr6.mahog), add = T)
-  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  plot(st_geometry(pegr6.frame), add = T)
   
-  # save plots if desired
-  #setwd(path.figs)
-  #savePlot(filename = "mod06fig13.pdf", type = "pdf")
-  ######## END ENSEMBLE INTERPRETATION
-  ################################################################################
- ########################################################################### 
-## Question #2
-# Calculate the frequencies of "presence" in each of the 5 SDHMs
-
+  
+  
+  
+  
 #############################################################################
 ## Question #3
 #Tally the frequencies of concordance after "clipping" and compare with above
