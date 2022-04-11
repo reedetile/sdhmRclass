@@ -8,7 +8,6 @@
 
 #path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
 path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
-
 path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 
@@ -30,19 +29,21 @@ path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
  
 setwd(paste(path.mod, sep = ""))
 load('ex7.RData')
-  GLM.cut <- mod.cut
+  LR.cut <- mod.cut$glm.cvpred
+  LR <- mod2.LR
 load('ex8.RData')
-  GAM.cut <- cut
+  GAM.cut <- cut$pred
+  GAM <- mod1.GAM
 load('ex9.RData')
   MAX <- mod1.MAX
-  MAX.cut <- mod.cut
+  MAX.cut <- mod.cut #### Why are there 6 variables? I think this should be 1 number?
 load('ex10.RData')
   RF <- pers.RF
 load('ex11.RData')
   BRT <- pers.BRT
   
 
-### Building a list of cut points. Missing the RF and BRT threshold cuts. Also, the values don't seem to be associated with these cuts.
+### Building a list of cut points. Missing the RF and BRT threshold cuts.
   cut.list <- c("GLM.cut",
                 "GAM.cut",
                 "MAX.cut"
@@ -58,22 +59,22 @@ load('ex11.RData')
   names(pers.dom) 
   
 # LR prediction and classification
-  setwd(paste(path.mod06,
+  setwd(paste(path.mod,
               "/maps",
               sep = ""))
   modFprob.LR <- predict(pers.dom,
-                         mod.GLM,
+                         LR,
                          filename = "modFprob.GLM.img", 
                          type = "response",
                          fun = predict,
                          index = 2,
                          overwrite = T)
-  modFclas.LR <- reclassify(mod.GLM,
-                            filename = "modFclas.GLM.img", 
+  modFclas.LR <- reclassify(LR,
+                            filename = "modFclas.LR.img", 
                             (c(0,
-                               modF.cut$GLM.cut,
+                               modF.cut$LR.cut,
                                0,
-                               modF.cut$GLM.cut,
+                               modF.cut$LR.cut,
                                1,
                                1)),
                             overwrite = T)
@@ -136,6 +137,42 @@ load('ex11.RData')
   
   
   
+# RF prediction and classification
+  library(randomForest)  # load library
+  modFprob.RF <- predict(pred.dom,
+                         mod.RF,
+                         filename = "modFprob.RF.img", 
+                         type = "prob",
+                         fun = predict,
+                         index = 2,
+                         overwrite = T) # prob map
+  modFclas.RF <- reclassify(modFprob.RF,
+                            filename = "modFclas.RF.img", 
+                            (c(0,
+                               modF.cut$RF.cut,
+                               0,
+                               modF.cut$RF.cut,
+                               1,
+                               1)),
+                            overwrite = T) # class map
+  
+  # giggle maps
+  par(mfrow = c(1, 2))
+  plot(modFprob.RF,
+       axes = T,
+       main = "RF probability map") # plot probability map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty
+  plot(modFclas.RF,
+       axes = T,
+       main = "RF classfied map") # plot classified map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty 
+  par(mfrow = c(1, 1))  
   
  ########################################################################### 
 ## Question #2
