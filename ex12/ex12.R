@@ -10,6 +10,7 @@
 path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
+path.maps <- paste(path.root, '/data/exercise/maps', sep = '')
 
 
 # load libraries
@@ -36,17 +37,21 @@ load('ex8.RData')
   GAM <- mod1.GAM
 load('ex9.RData')
   MAX <- mod1.MAX
-  MAX.cut <- mod.cut #### Why are there 6 variables? I think this should be 1 number?
+  MAX.cut <- mod.cut$spec_sens
 load('ex10.RData')
   RF <- pers.RF
+  RF.cut <- mod.cut$persRF.pred
 load('ex11.RData')
   BRT <- pers.BRT
+  BRT.cut <- mod.cut$pred
   
 
 ### Building a list of cut points. Missing the RF and BRT threshold cuts.
-  cut.list <- c("GLM.cut",
-                "GAM.cut",
-                "MAX.cut"
+  cut.list <- c(LR.cut,
+                GAM.cut,
+                MAX.cut,
+                RF.cut,
+                BRT.cut
   )
   cut.list # threshold cuts?
 
@@ -59,9 +64,9 @@ load('ex11.RData')
   names(pers.dom) 
   
 # LR prediction and classification
-  setwd(paste(path.mod,
-              "/maps",
+  setwd(paste(path.maps,
               sep = ""))
+  names(pers.dom) <- paste(names(pers.dom),'img')
   modFprob.LR <- predict(pers.dom,
                          LR,
                          filename = "modFprob.GLM.img", 
