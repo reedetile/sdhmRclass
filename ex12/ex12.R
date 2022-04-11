@@ -165,9 +165,9 @@ savePlot(filename = "mod06fig01.pdf", type = "pdf")
   modFclas.RF <- reclassify(modFprob.RF,
                             filename = "modFclas.RF.img", 
                             (c(0,
-                               modF.cut$RF.cut,
+                               RF.cut,
                                0,
-                               modF.cut$RF.cut,
+                               RF.cut,
                                1,
                                1)),
                             overwrite = T) # class map
@@ -190,6 +190,36 @@ savePlot(filename = "mod06fig01.pdf", type = "pdf")
        add = T) # make pretty 
   par(mfrow = c(1, 1))  
   
+setwd(paste(path.mod06, "/maps", sep = ""))
+library(dismo)
+library(gbm)
+modFprob.BRT <- predict(pers.dom,
+                        BRT,
+                        n.trees = BRT$gbm.call$best.trees, 
+                          type = "response",
+                        filename = "modFprob.BRT.img",
+                        overwrite = T) # prob map
+  modFclas.BRT <- reclassify(modFprob.BRT,
+                             c(0, BRT.cut,
+                               0, BRT.cut,
+                               1,
+                               1), 
+                             filename = "modFclas.BRT.img",
+                             overwrite = T) # clas map
+  
+  # giggle plots
+  par(mfrow = c(1, 2))
+  plot(modFprob.BRT, axes = T, main = "BRT probability map") # plot probability map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  plot(modFclas.BRT, axes = T, main = "BRT classfied map") # plot classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  par(mfrow = c(1, 2))
+  
+  # save BRT plots if desired 
+  #setwd(path.figs)
+  #savePlot(filename = "mod06fig04.pdf", type = "pdf")
  ########################################################################### 
 ## Question #2
 # Calculate the frequencies of "presence" in each of the 5 SDHMs
