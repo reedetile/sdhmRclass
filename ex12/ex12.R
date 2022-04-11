@@ -11,6 +11,8 @@ path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.maps <- paste(path.root, '/data/exercise/maps', sep = '')
+path.gis <- paste(path.root, "/data/gis_layers", sep = "")
+path.figs <- paste(path.root, "/powerpoints/figures", sep = "")
 
 
 # load libraries
@@ -62,6 +64,11 @@ load('ex11.RData')
   pers.dom <- stack(pers.list) # build raster stack
   pers.dom # examine stack
   names(pers.dom) 
+
+# import some shapefiles for pretty plots
+  setwd(path.gis)
+  pegr6.mahog <- st_read(dsn = ".", layer = "rareplant_mahog")
+  pegr6.frame <- st_read(dsn = ".", layer = "rareplant_frame")
   
 # LR prediction and classification
   setwd(paste(path.maps,
@@ -74,15 +81,15 @@ load('ex11.RData')
                          fun = predict,
                          index = 2,
                          overwrite = T)
-  modFclas.LR <- reclassify(LR,
-                            filename = "modFclas.LR.img", 
-                            (c(0,
-                               modF.cut$LR.cut,
-                               0,
-                               modF.cut$LR.cut,
-                               1,
-                               1)),
-                            overwrite = T)
+  modFclass.LR <- reclassify(pers.prob,
+                             filename = "modFclas.LR.img",
+                           c(0,
+                             mod.cut[[2]],
+                             0,
+                                        mod.cut[[2]],
+                             1,
+                             1),
+                           overwrite=TRUE)
   
 # giggle plots
   par(mfrow = c(1, 2))
@@ -93,7 +100,7 @@ load('ex11.RData')
        add = T)
   plot(st_geometry(pegr6.frame),
        add = T)  # make pretty
-  plot(modFclas.LR,
+  plot(modFclass.LR,
        axes = T,
        main = "LR classfied map") # plot classified map
   plot(st_geometry(pegr6.mahog),
@@ -102,11 +109,15 @@ load('ex11.RData')
        add = T) # make pretty 
   par(mfrow = c(1, 1))
   
-  
+  # save LR plots if desired 
+setwd(paste(path.figs,
+             sep = ""))
+savePlot(filename = "mod06fig01.pdf", type = "pdf")
+
 # GAM prediction and classification
   library(gam)
-  modFprob.GAM <- predict(pred.dom,
-                          mod.GAM,
+  modFprob.GAM <- predict(pers.dom,
+                          GAM,
                           filename = "modFprob.GAM.img", 
                           type = "response",
                           fun = predict,
@@ -115,9 +126,9 @@ load('ex11.RData')
   modFclas.GAM <- reclassify(modFprob.GAM,
                              filename = "modFclas.GAM.img", 
                              (c(0,
-                                modF.cut$GAM.cut,
+                                GAM.cut,
                                 0,
-                                modF.cut$GAM.cut,
+                                GAM.cut,
                                 1,
                                 1)),
                              overwrite = T) 
