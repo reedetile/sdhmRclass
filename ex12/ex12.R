@@ -190,7 +190,7 @@ savePlot(filename = "mod06fig01.pdf", type = "pdf")
        add = T) # make pretty 
   par(mfrow = c(1, 1))  
   
-setwd(paste(path.mod06, "/maps", sep = ""))
+
 library(dismo)
 library(gbm)
 modFprob.BRT <- predict(pers.dom,
@@ -209,17 +209,59 @@ modFprob.BRT <- predict(pers.dom,
   
   # giggle plots
   par(mfrow = c(1, 2))
-  plot(modFprob.BRT, axes = T, main = "BRT probability map") # plot probability map
-  plot(st_geometry(pegr6.mahog), add = T)
-  plot(st_geometry(pegr6.frame), add = T) # make pretty
-  plot(modFclas.BRT, axes = T, main = "BRT classfied map") # plot classified map
-  plot(st_geometry(pegr6.mahog), add = T)
-  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  plot(modFprob.BRT,
+       axes = T,
+       main = "BRT probability map") # plot probability map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty
+  plot(modFclas.BRT, axes = T,
+       main = "BRT classfied map") # plot classified map
+  plot(st_geometry(pegr6.mahog),
+       add = T)
+  plot(st_geometry(pegr6.frame),
+       add = T) # make pretty 
   par(mfrow = c(1, 2))
   
   # save BRT plots if desired 
+  setwd(path.figs)
+  savePlot(filename = "mod06fig04.pdf",
+           type = "pdf")
+  
+  ## MAXENT prediction and classification
+  setwd(path.maps)
+  library(dismo) # load library
+  modFprob.MAX <- predict(MAX,
+                          pers.dom,
+                          filename = "modFprob.MAX.img",
+                          overwrite = T)  
+  modFclas.MAX <- reclassify(modFprob.MAX,
+                             filename = "modFclas.MAX.img", 
+                             c(0,
+                               MAX.cut,
+                               0,
+                               MAX.cut,
+                               1,
+                               1),
+                             overwrite = T) # clas map
+  
+  # giggle plots
+  par(mfrow = c(1, 2))
+  plot(modFprob.MAX, axes = T, main = "MAX probability map") # plot probability map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty
+  plot(modFclas.MAX, axes = T, main = "MAX classfied map") # plot classified map
+  plot(st_geometry(pegr6.mahog), add = T)
+  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+  par(mfrow = c(1, 1))
+  
+  # save MAX plots if desired 
   #setwd(path.figs)
-  #savePlot(filename = "mod06fig04.pdf", type = "pdf")
+  #savePlot(filename = "mod06fig05.pdf", type = "pdf")
+  ####
+  ######## END PREDICTION PROBABILITY AND CLASSIFED MAPS
+  ################################################################################
  ########################################################################### 
 ## Question #2
 # Calculate the frequencies of "presence" in each of the 5 SDHMs
