@@ -155,8 +155,8 @@ savePlot(filename = "mod06fig01.pdf", type = "pdf")
   
 # RF prediction and classification
   library(randomForest)  # load library
-  modFprob.RF <- predict(pred.dom,
-                         mod.RF,
+  modFprob.RF <- predict(pers.dom,
+                         RF,
                          filename = "modFprob.RF.img", 
                          type = "prob",
                          fun = predict,
