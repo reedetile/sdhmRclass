@@ -66,15 +66,54 @@ load('pers.topoDOM.RData')
 pers.dom <- pers.topoDOM
 
 setwd(path.ex)
-load()
-pres.fnetR <- raster(pres.fnetR)
-setwd(path.gis)
-load('pers.bufptR.RData')
-fnet1 <- crop(pres.fnetR, pers.bufptR) # crop fishnet to spp domain
+load('pres.fnet.RData', verbose = TRUE)
 
-plot(pres.fnetR,)
-plot(st_geometry(states), add = T) # spp polygon
-plot(fnet1, add = T, col = "red", legend = F) # spp bbox
-plot(st_geometry(pers.bufptR), lwd = 2, add = T) # spp polygon
-points(tr_PERS$tr.wgs_x, tr_PERS$tr.wgs_y, pch = 20, col = "white") # add spp P/A points
+##################################
+pres.fnetSP <- as_Spatial(pres.fnetSF)
+fnet1 <- crop(rasterize(pres.fnetSP,pers.dom[[1]]),pers.bufptR)
+fnet2 <- as.data.frame(fnet1)
+head(fnet2)
 
+#remove duplicate fnetids from p/a data
+pers.PA <- subset(pers.PPsA, !duplicated(pers.PPsA[,1]))
+head(pers.PA,2)
+
+#remove spp P/A from fishet, fnet3 will be sample frame for field test
+fnet3 <- as.data.frame(fnet2[!fnet2$FNETID %in% pers.PA,])
+head(fnet3)
+dim(fnet3)
+
+
+#create final df for sample selection: FNETID and cell x&y
+fnet.merge <- merge(fnet2,fnet3, by = c('FNETID','cell.wgs_x','cell.wgs_y'))
+head(fnet.merge,2)
+dim(fnet.merge)
+
+pers.sample.dom <- stack(prob
+
+
+load('pers.PPsA.RData', verbose = TRUE)
+fnet1 = pres.fnetDF[!pres.fnetDF$FNETID %in% pers.PPsA$FNETID,]
+names(fnet1)
+fnet2 = fnet1[sample(nrow(fnet1),250),]
+dim(fnet2)
+#giggle plot#
+load('pres.bufSF.RDS')
+load("pers.bufptR.img")
+fnet2SF <- st_as_sf(fnet2, coords = c('cell.wgs_x', 'cell.wgs_y'), crs = prj.wgs84)
+plot(fnet2SF$geometry)
+plot(pers.bufptR, add =T)
+plot(pres.bufSF, add = T)
+#it works! mostly#
+
+#####################################################################################
+#Build sample frames for field sample extractions
+sample.dom <- stack(prob.dom,probSTD.dom,clas.dom)
+names(sample.dom) <- c('prob.dom','probSTD.dom','clas.dom')
+sample.dom
+
+# extract data from rasters & bind to sample dataframe
+ext.1 <- raster::extract(x = sample.dom, y = fnet2[, 2:3], method = 'simple') # basic extract
+ext.1 <- as.data.frame((ext.1)
+fr.2sample <- cbind(fnet.s1, ext.1) # bind extracted values to sample DF
+head(fr.2sample, 2) # examine

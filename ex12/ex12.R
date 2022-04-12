@@ -6,8 +6,8 @@
 #  * "Clip" all these maps by the bounding boxes created earlier (see Module 2.3.3 #for refresher, if needed)
 #  * Output these map products as **`.img`** files
 
-#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
-path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.maps <- paste(path.root, '/data/exercise/maps', sep = '')
