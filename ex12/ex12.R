@@ -533,13 +533,24 @@ modFprob.BRT <- predict(pers.dom,
   plot(st_geometry(pegr6.frame), add = T)
   
   
-  
-  
-  
 #############################################################################
 ## Question #3
 #Tally the frequencies of concordance after "clipping" and compare with above
 
+#### clipping...
+  # Need to clip pers.DOM 
+
+  pers.dom # examine stack
+  names(pers.dom) 
+  plot(pers.dom)
+############################################# CLIPP
+  
+  setwd(path.mod)
+  load("pers.bufR.RData")
+ pers.dom.clip <- crop(x = pers.dom, y = pers.bufR)
+  plot(pers.dom.clip)
+  plot(pers.bufR)
+  
 #############################################################################
 ## Question #4
 
