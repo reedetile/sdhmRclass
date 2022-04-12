@@ -12,18 +12,19 @@ output: html_document
        then comment out or delete mine
 --> 
 ```{r global_options, include=FALSE}
-knitr::opts_knit$set(root.dir = "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8")
+knitr::opts_knit$set(root.dir = "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1") #Reed Path
+#knitr::opts_knit$set(root.dir = "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8")
 #knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
 knitr::opts_chunk$set(warning=FALSE,
                       error= FALSE,
                       message=FALSE)
 ```
 
-```{r global option}
+```{r}
 #----------Global options---------#
 #Setting Paths
-#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
-path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.ex <- paste(path.root,
                  "/data/exercise/traindat",
                  sep = "") #Path to mod 2
@@ -57,7 +58,7 @@ library(modeest)
 # source course CRSs
 setwd(path.root)
 getwd()
-source("C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/r_code/prjs4_sdhmR.r")
+source("r_code/prjs4_sdhmR.r")
 ls(pattern = "prj.") # should be 5 prj.* objects
 ```
 ---
@@ -113,8 +114,8 @@ Remember, you will have been assigned data for *edulis* having one the following
 
 ############################
 #Question 1: Import and explore the data
-
-load('C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex6/tr_PERS.Rdata')
+setwd(path.ex)
+load('tr_PERS.RDATA')
 class(tr_PERS)
 head(tr_PERS)
 drops <- c('wgs_xF',
@@ -538,9 +539,9 @@ pers.class <- reclassify(pers.prob,
 pers.class
 
 #restrict class and prob models to domain
-#setwd(path.ex)
+setwd(path.ex)
 #load('pers.PPsA.RData')
-pers.bufR <-raster('C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/pers.bufR.img')
+pers.bufR <-raster('pers.bufR.img')
 plot(pers.bufpt)
 new.pers.bufR <- projectRaster(pers.bufR,
                                pers.class)
@@ -577,16 +578,15 @@ plot(st_geometry(states),
 
 These data will be used again in Module 10, Ensemble Models.
 ```{r}
-setwd('C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8')
-save.image(pers.class,
+setwd(path.ex)
+save(pers.class,
            pers.prob,
-           file = 'C:/Users/14842/Documents/SDHM/sdhmR-V2022.1/SDHM_Reed/ex8')
-save(cut,
+           file = 'ex8.img')
+save(mod1.GAM, cut,
      mods.acc,
      pers.class,
      pers.prob, 
      file = 'ex8.RData')
-save.image()
 ```
 
 ```

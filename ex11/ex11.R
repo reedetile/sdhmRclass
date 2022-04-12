@@ -279,6 +279,6 @@ plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
 #######################################################################
 #Question 5: save everything
 setwd(path.ex)
-save(pers.BRT,pers.BRT2, file = 'ex11.RData')
+save(mod.cut, pers.BRT,pers.BRT2, file = 'ex11.RData')
 save(pers.class.BRT, file = 'persClassBRT.img')
 save(pers.prob.BRT, file = 'persProbBRT.img')
