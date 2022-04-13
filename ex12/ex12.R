@@ -157,7 +157,7 @@ savePlot(filename = "mod06fig01.pdf", type = "pdf")
   library(randomForest)  # load library
   modFprob.RF <- predict(pers.dom,
                          RF,
-                         filename = "modFprob.RF.img", 
+                         #filename = "modFprob.RF.img", 
                          type = "prob",
                          fun = predict,
                          index = 2,
@@ -309,7 +309,7 @@ modFprob.BRT <- predict(pers.dom,
   minValue(prob.mean) # min pr.mean
   probSTD.mean <- mean(probSTD.dom) # mean standardized prob map
   clas.sum <- sum(clas.dom) # sum of models by cell
-  
+  save(prob.mean,probSTD.mean,clas.sum, file = 'ensembleSTATS.RData')
   # giggle plots: mean & sum
   par(mfrow = c(1, 2))
   plot(prob.mean,
