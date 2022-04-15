@@ -109,10 +109,6 @@ load('ex11.RData')
        add = T) # make pretty 
   par(mfrow = c(1, 1))
   
-  # save LR plots if desired 
-setwd(paste(path.figs,
-             sep = ""))
-savePlot(filename = "mod06fig01.pdf", type = "pdf")
 
 # GAM prediction and classification
   library(gam)
@@ -547,9 +543,11 @@ modFprob.BRT <- predict(pers.dom,
   
   setwd(path.mod)
   load("pers.bufR.RData")
- pers.dom.clip <- crop(x = pers.dom, y = pers.bufR)
+  load("pers.bufptR.img")
+  pers.dom.clip <- raster::crop(x = pers.dom, y = pers.bufptR)
   plot(pers.dom.clip)
   plot(pers.bufR)
+  plot(pers.dom)
   
 #############################################################################
 ## Question #4
