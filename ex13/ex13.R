@@ -52,6 +52,9 @@ tr_PERS <- tr_PERS[ ,!(names(tr_PERS) %in% drops)]
 tr_PERS <- na.omit(tr_PERS)
 dim(tr_PERS)
 
+load('pers.PPsA.RData', verbose = TRUE)
+load('pres.bufSF.RDS')
+load("pers.bufptR.img")
 # Program Body------------------------------------------
 #load in ensemble model
 setwd(path.ex)
@@ -89,17 +92,15 @@ fnet.merge <- merge(fnet2,fnet3, by = c('FNETID','cell.wgs_x','cell.wgs_y'))
 head(fnet.merge,2)
 dim(fnet.merge)
 
-pers.sample.dom <- stack(prob
 
 
-load('pers.PPsA.RData', verbose = TRUE)
+
 fnet1 = pres.fnetDF[!pres.fnetDF$FNETID %in% pers.PPsA$FNETID,]
 names(fnet1)
 fnet2 = fnet1[sample(nrow(fnet1),250),]
 dim(fnet2)
 #giggle plot#
-load('pres.bufSF.RDS')
-load("pers.bufptR.img")
+
 fnet2SF <- st_as_sf(fnet2, coords = c('cell.wgs_x', 'cell.wgs_y'), crs = prj.wgs84)
 plot(fnet2SF$geometry)
 plot(pers.bufptR, add =T)
@@ -108,12 +109,59 @@ plot(pres.bufSF, add = T)
 
 #####################################################################################
 #Build sample frames for field sample extractions
-sample.dom <- stack(prob.dom,probSTD.dom,clas.dom)
-names(sample.dom) <- c('prob.dom','probSTD.dom','clas.dom')
-sample.dom
 
-# extract data from rasters & bind to sample dataframe
-ext.1 <- raster::extract(x = sample.dom, y = fnet2[, 2:3], method = 'simple') # basic extract
-ext.1 <- as.data.frame((ext.1)
-fr.2sample <- cbind(fnet.s1, ext.1) # bind extracted values to sample DF
-head(fr.2sample, 2) # examine
+####Tom's suggestion###
+set.seed(1234)
+srs1 <- fnet3 %>% 
+  dplyr::slice_sample(n = sample.size) # retains the full row
+
+# sample.dom <- stack(prob.mean,probSTD.mean,clas.sum)
+# names(sample.dom) <- c('prob.mean','probSTD.mean','clas.sum')
+# sample.dom
+# 
+# # extract data from rasters & bind to sample dataframe
+# ext.1 <- raster::extract(x = sample.dom, y = fnet2[, 2:3], method = 'simple') # basic extract
+# ext.1 <- as.data.frame(ext.1)
+# fr.2sample <- cbind(fnet.merge, ext.1) # bind extracted values to sample DF
+# head(fr.2sample, 2) # examine
+# 
+# Simple random sample inluceding bbox
+# srs draw from sample from
+# set.seed(1234)
+# sample.size=250
+# srs1 <- fr.2sample[sample(1:nrow(fr.2sample),sample.size),]
+head(srs1,2)
+dim(srs1)
+
+## giggleplot includes bbox:
+pin.fig <- c(5.373, 3.623)  # fig size
+par(pin = pin.fig)  # set fig par
+
+#plot(fnet1, col = "white", legend = F)  # spp bbox
+plot(pers.bufptR, col = "lightskyblue4", legend = F) # spp bbox
+points(pers.PPsA$wgs_x, pers.PPsA$wgs_y, pch = 16, col= "snow4")
+points(srs1$cell.wgs_x, srs1$cell.wgs_y, pch = 16, col = "tomato3") # add spp P/A points
+legend("bottomleft", title = "SRS sample points",
+       legend = c("Species domain", "Presence points", "SRS sample points"), bg = "white",
+       cex = .75, bty = "0", inset = c(0.05, 0.05), pt.cex=1.5, pch = c(15, 15, 15),
+       col = c("lightskyblue4", "snow4", "tomato3"))
+
+head(srs1,2) #examine dataframe for export
+
+#build spatial dataset
+pers.srs <- srs1[c('FNETID','cell.wgs_x','cell.wgs_y')]
+names(pers.srs) <- c('FNETID','wgs84_x','wgs84_y')
+head(pers.srs)
+#convert to sf
+pers.srsSF <- st_as_sf(pers.srs, coords = c('wgs84_x','wgs84_y'),
+                       crs = prj.wgs84, remove =F) #remove=F to retain input x,y
+head(pers.srsSF,2)
+
+setwd(path.gis) # output path
+st_write(pers.srsSF, dsn = ".", layer = "pers.srs", 
+         driver = "ESRI Shapefile", delete_dsn = T) # output shapefile
+
+pers.srsDF <- st_drop_geometry(pers.srsSF)
+head(pers.srsDF,2)
+save(pers.srsSF,pers.srsDF, file = 'ex13.RData')
+savePlot(filename = "ex13fig01.pdf", type = "pdf")
