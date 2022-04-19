@@ -1,0 +1,107 @@
+---
+title: "Exercise Title Goes Here"
+author: "Your Name Goes Here"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: html_document
+---
+
+<!-- These are global options  
+       set root directory here 
+       NOTE mine is active; yours is commented out
+       change the path to reflect your CPU,
+       then comment out or delete mine
+--> 
+```{r global_options, include=FALSE}
+knitr::opts_knit$set(root.dir = "~/words/classes/sdmR_ALLversions/sdhmR-V2022.1")
+#knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
+knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
+```
+
+---
+
+## This exercise links to Module 7
+
+Submit the completed exercise to us at:
+
+* t.edwards@usu.edu 
+* eric_tsakiris@fws.gov  
+
+---
+
+## Context
+
+The data are of the *Pinus edulis* Common piñon, the species you dealt with in Exercise #3 -- #5.  This exercise relies on the dataframe you generated in exercise #6.  Hopefully you saved those combined presence:absence dataframe, with the reduced variables you begin SDHM model construction with, or regrettably you will need to return to exercise #6 and re--build that dataframe.
+
+The goal is to: 
+
+* Build a dataframe of [X,Y] points selected for a field sample campaign
+  * (You need only show the first 10 lines of the dataframe)
+* Build ensemble concordance map products of 3, 5, and union of all models 
+* Build tables of frequencies: 
+  * Presences (ie, sum the cells of classified presence for the 3, 5, and union ensembles) 
+  * Concordances (remember, this is a measure of "how much !!) 
+
+Remember, you will have been assigned data for *edulis* having one the following four discrete labels:
+
+* **Seedlings**:  these data indicate spatial locations where seedlings of the tree have been found
+* **Mortality**: these data indicate spatial locations where mortality has been observed
+* **Persistence**: these data have no observed mortality or seedling at given spatial locations
+* **Range**: the total dataset, including all spatial locations of seedlings, mortality, and persistence
+
+---
+
+## There Are Different Objectives for Each of the Group Labels -- Pay Attention Here !!
+
+* **RANG** => SRS based on bounding box, with an $n$ = 250
+* **SEED** => SRS based on species modelling, with an $n$ = 250
+* **PERS**=> SRS based on concordance strata, within bounding box, with $n$'s of:
+  * N[0,1,2,3,4,5] = c(25, 45, 45, 45, 45, 45)
+* **MORT** => SRS based on concordance strata, within modeling domain, with $n$'s of:
+  * N[0,1,2,3,4,5] = c(25, 45, 45, 45, 45, 45)
+
+---
+
+## The Data
+
+* Load:
+  * The previously constructed SDHM models, for your group label, and 
+  * The (i) prediction; and (ii) classified maps
+
+If you did **NOT** save these you're in a bit of trouble ...
+
+---
+
+## Question #1
+
+* Construct maps showing the sample points, by your respective group and its unique objective
+
+
+```{r}
+# code for the question goes inside chunks, if part of the exercise solution.
+#  If not part of the exercise questions delete this.
+#  NOTE: do NOT answer all questions from within the same chunk
+```
+
+**YET ANOTHER NOTE RELATED TO CODE:**  
+If King's English interpretation is required, it will go here, after each code chunk.
+
+---
+
+## Question #2
+
+* Export field sample points as a shapefile
+
+---
+
+## Question #3
+
+* Save your data as R objects:
+  * All field campaign maps as R spatial object
+  * All field campaign maps as **`.img`** format
+* Save these R objects in a **`.RData`** file as well
+
+---
+
+## The End
+
+---

@@ -4,8 +4,8 @@
 
 #----------Global options---------#
 #Setting Paths
-#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
-path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.ex <- paste(path.root, "/data/exercise/traindat", sep = "") #Path to mod 2
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.figs <- paste(path.root, "/powerpoints/figures", sep = "") #path to save figs
@@ -232,9 +232,8 @@ plot(st_geometry(states), add = T, lwd = 1.5) # add state boundaries
 #Question 5: save your data asn an R object
 #Accuracy metrics as a dataframe;
 #Classification threshold as a stand--alone scalar
-#Both prediction maps as **`.img`** format
 #Save these R objects in a **`.RData`** file
 setwd(path.ex)
-save.image(pers.class,pers.prob,file='ex7maps.img')
-save(mod.cut,mod1.acc,pers.class,pers.prob, file = 'ex7.RData')
-save.image()
+save(pers.class,pers.prob,file='ex7maps.img')
+save(mod2.LR, mod.cut,mod1.acc,pers.class,pers.prob, file = 'ex7.RData')
+

@@ -6,8 +6,8 @@
 #  * "Clip" all these maps by the bounding boxes created earlier (see Module 2.3.3 #for refresher, if needed)
 #  * Output these map products as **`.img`** files
 
-#path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
-path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
+path.root <- "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1" #Reed Laptop Path
+#path.root <- "C:/Users/14842/Documents/SDHM/sdhmR-V2022.1" #Lindsey Path
 path.mod <- paste(path.root, "/data/exercise/traindat", sep = "")
 path.preds <- paste(path.root, '/data/exercise/preds', sep = '')
 path.maps <- paste(path.root, '/data/exercise/maps', sep = '')
@@ -153,7 +153,7 @@ load('ex11.RData')
   library(randomForest)  # load library
   modFprob.RF <- predict(pers.dom,
                          RF,
-                         filename = "modFprob.RF.img", 
+                         #filename = "modFprob.RF.img", 
                          type = "prob",
                          fun = predict,
                          index = 2,
@@ -305,7 +305,7 @@ modFprob.BRT <- predict(pers.dom,
   minValue(prob.mean) # min pr.mean
   probSTD.mean <- mean(probSTD.dom) # mean standardized prob map
   clas.sum <- sum(clas.dom) # sum of models by cell
-  
+  save(prob.mean,probSTD.mean,clas.sum, file = 'ensembleSTATS.RData')
   # giggle plots: mean & sum
   par(mfrow = c(1, 2))
   plot(prob.mean,
