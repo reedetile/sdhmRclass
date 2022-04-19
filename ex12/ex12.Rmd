@@ -5,8 +5,11 @@ date: "4/19/2022"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r global_options, include=FALSE}
+knitr::opts_knit$set(root.dir = "D:/OneDrive - University of Vermont/Classes/Spring2022/sdhmR/sdhmR-V2022.1") #Reed Path
+#knitr::opts_knit$set(root.dir ="C:/Users/14842/Documents/SDHM/sdhmR-V2022.1") #Lindsey Path
+#knitr::opts_knit$set(root.dir = "~/sdhmR-V2022.1")
+knitr::opts_chunk$set(warning=FALSE,error=TRUE,message=FALSE)
 ```
 
 ## Question 1
@@ -81,17 +84,11 @@ load SDM models. I renamed the models and the threshold cuts to make it more cle
   plot(modFprob.LR,
        axes = T,
        main = "LR probability map") # plot probability map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T)  # make pretty
+ 
   plot(modFclass.LR,
        axes = T,
        main = "LR classfied map") # plot classified map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T) # make pretty 
+
   par(mfrow = c(1, 1))
 ```  
 
@@ -122,17 +119,10 @@ load SDM models. I renamed the models and the threshold cuts to make it more cle
   plot(modFprob.GAM,
        axes = T,
        main = "GAM probability map") # plot probability map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T) # make pretty
   plot(modFclas.GAM,
        axes = T,
        main = "GAM classfied map") # plot classified map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T) # make pretty 
+
   par(mfrow = c(1, 1)) 
   
 ```
@@ -165,17 +155,9 @@ load SDM models. I renamed the models and the threshold cuts to make it more cle
   plot(modFprob.RF,
        axes = T,
        main = "RF probability map") # plot probability map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T) # make pretty
   plot(modFclas.RF,
        axes = T,
        main = "RF classfied map") # plot classified map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T) # make pretty 
   par(mfrow = c(1, 1))  
 ```
 
@@ -204,16 +186,8 @@ modFprob.BRT <- predict(pers.dom,
   plot(modFprob.BRT,
        axes = T,
        main = "BRT probability map") # plot probability map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T) # make pretty
   plot(modFclas.BRT, axes = T,
        main = "BRT classfied map") # plot classified map
-  plot(st_geometry(pegr6.mahog),
-       add = T)
-  plot(st_geometry(pegr6.frame),
-       add = T) # make pretty 
   par(mfrow = c(1, 2))
   
   # save BRT plots if desired 
@@ -243,11 +217,9 @@ modFprob.BRT <- predict(pers.dom,
   # giggle plots
   par(mfrow = c(1, 2))
   plot(modFprob.MAX, axes = T, main = "MAX probability map") # plot probability map
-  plot(st_geometry(pegr6.mahog), add = T)
-  plot(st_geometry(pegr6.frame), add = T) # make pretty
+
   plot(modFclas.MAX, axes = T, main = "MAX classfied map") # plot classified map
-  plot(st_geometry(pegr6.mahog), add = T)
-  plot(st_geometry(pegr6.frame), add = T) # make pretty 
+
   par(mfrow = c(1, 1))
   
   # save MAX plots if desired 
