@@ -87,10 +87,10 @@ head(fnet3)
 dim(fnet3)
 
 
-#create final df for sample selection: FNETID and cell x&y
-fnet.merge <- merge(fnet2,fnet3, by = c('FNETID','cell.wgs_x','cell.wgs_y'))
-head(fnet.merge,2)
-dim(fnet.merge)
+# #create final df for sample selection: FNETID and cell x&y
+# fnet.merge <- merge(fnet2,fnet3, by = c('FNETID','cell.wgs_x','cell.wgs_y'))
+# head(fnet.merge,2)
+# dim(fnet.merge)
 
 
 
@@ -99,6 +99,7 @@ fnet1 = pres.fnetDF[!pres.fnetDF$FNETID %in% pers.PPsA$FNETID,]
 names(fnet1)
 fnet2 = fnet1[sample(nrow(fnet1),250),]
 dim(fnet2)
+
 #giggle plot#
 
 fnet2SF <- st_as_sf(fnet2, coords = c('cell.wgs_x', 'cell.wgs_y'), crs = prj.wgs84)
