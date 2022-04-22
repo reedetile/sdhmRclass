@@ -42,7 +42,9 @@ pers.bufptSF <- st_buffer(presSF,
 pers.bufptSF <- st_union(pers.bufptSF)
 plot(st_geometry(pers.bufptSF))
 plot(st_geometry(pres.bufSF), add = T)
-  
+setwd(path.ex)
+save(pres.bufSF, file = 'pres.bufSF.RDS')  
+
   ## Question #2 Build a fishnet for the bounding box
   
 setwd(path.gis)

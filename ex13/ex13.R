@@ -44,9 +44,25 @@ set.seed(1234)
 #load in prior data#---------------
 setwd(path.ex)
 load('tr_PERS.RData')
+<<<<<<< HEAD
+class(tr_PERS)
+head(tr_PERS)
+drops <- c('wgs_xF','wgs_yF','cell.wgs_x','cell.wgs_y','exp5nrm','exp3nrm','rough_1k','prad_sw_di',
+           'etpt_5','mind_yr_av','prec_winte','tave_sprin','UNIQUEID.x'
+           ,'UNIQUEID.y')
+tr_PERS <- tr_PERS[ ,!(names(tr_PERS) %in% drops)]
+tr_PERS <- na.omit(tr_PERS)
+dim(tr_PERS)
+
+load('pers.PPsA.RData', verbose = TRUE)
+load('pres.bufSF.RDS')
+load("pers.bufptR.img")
+# Program Body------------------------------------------
+=======
 load('pres.bufSF.RDS')
 load("pers.bufptR.img")
 load('pers.PPsA.RData', verbose = TRUE)
+>>>>>>> eea0edcb91b80de17385d73824352813d7d3a50f
 #load in ensemble model
 setwd(path.ex)
 load('ensemble.dom.RData', verbose = T)
@@ -93,6 +109,23 @@ head(fnet3)
 dim(fnet3)
 
 
+<<<<<<< HEAD
+# #create final df for sample selection: FNETID and cell x&y
+# fnet.merge <- merge(fnet2,fnet3, by = c('FNETID','cell.wgs_x','cell.wgs_y'))
+# head(fnet.merge,2)
+# dim(fnet.merge)
+
+
+
+
+fnet1 = pres.fnetDF[!pres.fnetDF$FNETID %in% pers.PPsA$FNETID,]
+names(fnet1)
+fnet2 = fnet1[sample(nrow(fnet1),250),]
+dim(fnet2)
+
+#giggle plot#
+
+=======
 #create final df for sample selection: FNETID and cell x&y
 fnet.merge <- merge(fnet2,fnet3, by = c('FNETID','cell.wgs_x','cell.wgs_y'))
 head(fnet.merge,2)
@@ -100,6 +133,7 @@ dim(fnet.merge)
 
 
 
+>>>>>>> eea0edcb91b80de17385d73824352813d7d3a50f
 fnet2SF <- st_as_sf(fnet2, coords = c('cell.wgs_x', 'cell.wgs_y'), crs = prj.wgs84)
 plot(fnet2SF$geometry)
 plot(pers.bufptR, add =T)
@@ -108,6 +142,29 @@ plot(pres.bufSF, add = T)
 
 #####################################################################################
 #Build sample frames for field sample extractions
+<<<<<<< HEAD
+
+####Tom's suggestion###
+set.seed(1234)
+srs1 <- fnet3 %>% 
+  dplyr::slice_sample(n = sample.size) # retains the full row
+
+# sample.dom <- stack(prob.mean,probSTD.mean,clas.sum)
+# names(sample.dom) <- c('prob.mean','probSTD.mean','clas.sum')
+# sample.dom
+# 
+# # extract data from rasters & bind to sample dataframe
+# ext.1 <- raster::extract(x = sample.dom, y = fnet2[, 2:3], method = 'simple') # basic extract
+# ext.1 <- as.data.frame(ext.1)
+# fr.2sample <- cbind(fnet.merge, ext.1) # bind extracted values to sample DF
+# head(fr.2sample, 2) # examine
+# 
+# Simple random sample inluceding bbox
+# srs draw from sample from
+# set.seed(1234)
+# sample.size=250
+# srs1 <- fr.2sample[sample(1:nrow(fr.2sample),sample.size),]
+=======
 
 sample.dom <- stack(prob.mean,probSTD.mean,clas.sum)
 names(sample.dom) <- c('prob.mean','probSTD.mean','clas.sum')
@@ -124,6 +181,7 @@ head(fr.2sample, 2) # examine
 #set.seed(1234)
 sample.size=250
 srs1 <- fr.2sample[sample(1:nrow(fr.2sample),sample.size),]
+>>>>>>> eea0edcb91b80de17385d73824352813d7d3a50f
 head(srs1,2)
 dim(srs1)
 
@@ -140,7 +198,10 @@ legend("bottomleft", title = "SRS sample points",
        cex = .75, bty = "0", inset = c(0.05, 0.05), pt.cex=1.5, pch = c(15, 15, 15),
        col = c("lightskyblue4", "snow4", "tomato3"))
 
+<<<<<<< HEAD
+=======
 ###Question 2: Export field sample points as a shapefil###
+>>>>>>> eea0edcb91b80de17385d73824352813d7d3a50f
 head(srs1,2) #examine dataframe for export
 
 #build spatial dataset
@@ -156,6 +217,12 @@ setwd(path.gis) # output path
 st_write(pers.srsSF, dsn = ".", layer = "pers.srs", 
          driver = "ESRI Shapefile", delete_dsn = T) # output shapefile
 
+<<<<<<< HEAD
+pers.srsDF <- st_drop_geometry(pers.srsSF)
+head(pers.srsDF,2)
+save(pers.srsSF,pers.srsDF, file = 'ex13.RData')
+savePlot(filename = "ex13fig01.pdf", type = "pdf")
+=======
 #Question 3: save everythin as r objects
 setwd(path.ex)
 #Export SF and DF as RData
@@ -163,3 +230,4 @@ pers.srsDF <- st_drop_geometry(pers.srsSF)
 head(pers.srsDF,2)
 save(pers.srsSF,pers.srsDF, file = 'ex13.RData')
 savePlot(filename = "ex13fig01.pdf", type = "pdf")
+>>>>>>> eea0edcb91b80de17385d73824352813d7d3a50f
